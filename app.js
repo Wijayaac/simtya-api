@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const passport = require("passport");
+const handleErrors = require("./middleware/handleErrors");
 
 /**
  * -------------- GENERAL SETUP ----------------
@@ -30,6 +31,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // Imports all of the routes from ./routes/index.js
 app.use(require("./routes"));
+
+// global error handler
+app.use(handleErrors);
 
 // Server listens on http://localhost:3000
 app.listen(process.env.PORT || 3000, function () {

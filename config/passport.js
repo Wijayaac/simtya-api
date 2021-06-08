@@ -12,21 +12,37 @@ const options = {
   secretOrKey: PUB_KEY,
   algorithms: ["RS256"],
 };
-
-const strategy = new JWTStrategy(options, (payload, done) => {
-  database("users")
-    .where("id", "=", payload.sub)
-    .first()
-    .then((user) => {
-      if (user) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
-    })
-    .catch((err) => done(err, null));
-});
-
 module.exports = (passport) => {
-  passport.use(strategy);
+  passport.use(
+    "user",
+    new JWTStrategy(options, (payload, done) => {
+      database("users")
+        .where("id", "=", payload.sub)
+        .first()
+        .then((user) => {
+          if (user) {
+            return done(null, user);
+          } else {
+            return done(null, false);
+          }
+        })
+        .catch((err) => done(err, null));
+    })
+  );
+  passport.use(
+    "admin",
+    new JWTStrategy(options, (payload, done) => {
+      database("users")
+        .where("id", "=", payload.sub)
+        .first()
+        .then((user) => {
+          if (user.role == 5) {
+            return done(null, user);
+          } else {
+            return done(null, false);
+          }
+        })
+        .catch((err) => done(err, null));
+    })
+  );
 };

@@ -9,7 +9,7 @@ router.get("/", (req, res) => {
 
 router.get(
   "/list",
-  passport.authenticate("jwt", { session: false }),
+  passport.authenticate("user", { session: false }),
   (req, res, next) => {
     database("users")
       .then((user) => {
