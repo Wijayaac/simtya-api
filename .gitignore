@@ -1,3 +1,5 @@
+#public and private key
+id_rsa_priv.pem
 # Logs
 logs
 *.log
