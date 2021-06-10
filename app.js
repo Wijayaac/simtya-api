@@ -33,7 +33,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(require("./routes"));
 
 // global error handler
-app.use(handleErrors);
+// app.use(handleErrors);
 
 // Server listens on http://localhost:3000
 app.listen(process.env.PORT || 3000, function () {
