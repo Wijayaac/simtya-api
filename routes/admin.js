@@ -58,22 +58,15 @@ router.post("/register", (req, res, next) => {
   const salt = saltHash.salt;
   const hash = saltHash.hash;
   database("users")
-    .insert(
-      {
-        username: req.body.username,
-        salt: salt,
-        hash: hash,
-        role: req.body.role,
-      },
-      ["id", "role"]
-    )
+    .insert({
+      username: req.body.username,
+      salt: salt,
+      hash: hash,
+      role: req.body.role,
+    })
     .then((user) => {
-      const jwt = utils.issueJWT(user);
       res.json({
         success: true,
-        user: user,
-        token: jwt.token,
-        expiresIn: jwt.expires,
       });
     })
     .catch((err) => next(err));
