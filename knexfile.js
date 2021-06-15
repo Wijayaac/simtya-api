@@ -12,6 +12,7 @@ module.exports = {
       directory: "./db/seeds/dev",
     },
     useNullAsDefault: true,
+    pool: { min: 0, max: 5 },
   },
   production: {
     client: "postgresql",
@@ -23,5 +24,6 @@ module.exports = {
       directory: "./db/seeds/production",
     },
     useNullAsDefault: true,
+    pool: { min: 0, max: 5 },
   },
 };
