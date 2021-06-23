@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Allows our Angular application to make HTTP requests to Express application
-// app.use(cors);
+app.use(cors());
 
 /**
  * -------------- ROUTES ----------------
@@ -33,10 +33,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(require("./routes"));
 
 // global error handler
-// app.use(handleErrors);
+app.use(handleErrors);
 
 // Server listens on http://localhost:3000
-app.listen(process.env.PORT || 3000, function () {
+app.listen(process.env.PORT || 4000, function () {
   console.log(
     "Express server listening on port %d in %s mode",
     this.address().port,
