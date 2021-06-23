@@ -4,20 +4,9 @@ const passport = require("passport");
 const utils = require("../lib/utils");
 
 router.get("/", (req, res) => {
-  res.json({ info: "Node.js, Express, and Postgres API" });
+  res.json({ info: "Node JS Backedn API" });
 });
 
-router.get(
-  "/list",
-  passport.authenticate("user", { session: false }),
-  (req, res, next) => {
-    database("users")
-      .then((user) => {
-        res.status(200).json(user);
-      })
-      .catch((err) => next(err));
-  }
-);
 router.post("/login", (req, res, next) => {
   database("users")
     .where("username", "=", req.body.username)
@@ -60,20 +49,18 @@ router.post("/register", (req, res, next) => {
   database("users")
     .insert(
       {
-        username: req.body.username,
         salt: salt,
         hash: hash,
+        username: req.body.username,
         role: req.body.role,
+        email: req.body.email,
       },
       ["id", "role"]
     )
     .then((user) => {
-      const jwt = utils.issueJWT(user);
       res.json({
         success: true,
         user: user,
-        token: jwt.token,
-        expiresIn: jwt.expires,
       });
     })
     .catch((err) => next(err));

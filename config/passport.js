@@ -14,7 +14,23 @@ const options = {
 };
 module.exports = (passport) => {
   passport.use(
-    "user",
+    "admin",
+    new JWTStrategy(options, (payload, done) => {
+      database("users")
+        .where("id", "=", payload.sub)
+        .first()
+        .then((user) => {
+          if (user.role == 1) {
+            return done(null, user);
+          } else {
+            return done(null, false);
+          }
+        })
+        .catch((err) => done(err, null));
+    })
+  );
+  passport.use(
+    "member",
     new JWTStrategy(options, (payload, done) => {
       database("users")
         .where("id", "=", payload.sub)
@@ -30,13 +46,13 @@ module.exports = (passport) => {
     })
   );
   passport.use(
-    "admin",
+    "driver",
     new JWTStrategy(options, (payload, done) => {
       database("users")
         .where("id", "=", payload.sub)
         .first()
         .then((user) => {
-          if (user.role == 5) {
+          if (user) {
             return done(null, user);
           } else {
             return done(null, false);
