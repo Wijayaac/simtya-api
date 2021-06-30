@@ -27,6 +27,10 @@ exports.up = function (knex, Promise) {
       table.increments();
       table.integer("id_vehicle", 8);
       table.integer("id_user", 8);
+      table.integer("start_km");
+      table.integer("end_km");
+      table.date("start_at");
+      table.date("end_at");
       table.text("description");
       table.boolean("read");
       table.timestamps(true, true);
@@ -34,10 +38,6 @@ exports.up = function (knex, Promise) {
     .createTable("service_details", (table) => {
       table.increments();
       table.integer("id_service", 8);
-      table.integer("start_km");
-      table.integer("end_km");
-      table.date("start_at");
-      table.date("end_at");
       table.integer("service_fee");
       table.string("service_part");
       table.text("description");
@@ -46,7 +46,11 @@ exports.up = function (knex, Promise) {
     .createTable("loan", (table) => {
       table.increments();
       table.integer("id_vehicle", 8);
-      table.integer("id_user", 8);
+      table.integer("start_km");
+      table.integer("end_km");
+      table.date("start_at");
+      table.date("end_at");
+      table.boolean("accidents");
       table.text("description");
       table.boolean("read");
       table.timestamps(true, true);
@@ -54,37 +58,28 @@ exports.up = function (knex, Promise) {
     .createTable("loan_details", (table) => {
       table.increments();
       table.integer("id_loan", 8);
-      table.integer("start_km");
-      table.integer("end_km");
-      table.date("start_at");
-      table.date("end_at");
-      table.boolean("accidents");
+      table.integer("id_user", 8);
       table.text("description");
       table.timestamps(true, true);
     })
     .createTable("pickup", (table) => {
       table.increments();
       table.integer("id_vehicle", 8);
-      table.integer("id_user", 8);
-      table.text("description");
-      table.boolean("read");
-      table.timestamps(true, true);
-    })
-    .createTable("pickup_details", (table) => {
-      table.increments();
-      table.integer("id_pickup");
       table.integer("start_km");
       table.integer("end_km");
       table.date("start_at");
       table.date("end_at");
       table.boolean("accidents");
       table.text("description");
+      table.boolean("ready");
+      table.boolean("read");
       table.timestamps(true, true);
     })
-    .createTable("passenger_details", (table) => {
+    .createTable("pickup_details", (table) => {
       table.increments();
-      table.integer("id_pickup", 8);
+      table.integer("id_pickup");
       table.integer("id_user", 8);
+      table.text("description");
       table.timestamps(true, true);
     });
 };
@@ -97,7 +92,7 @@ exports.down = function (knex, Promise) {
     .dropTable("pickup_details")
     .dropTable("service_details")
     .dropTable("loan")
-    .dropTable("service")
+    .dropTable("services")
     .dropTable("pickup")
     .dropTable("vehicles");
 };

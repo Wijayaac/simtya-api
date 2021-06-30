@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const database = require("../config/database");
 const passport = require("passport");
+const database = require("../config/database");
+const upload = require("../config/upload");
 
 router.get("/", (req, res) => {
   res.json({ info: "Node.js, Express, and Postgres API Backend driver" });
@@ -12,7 +13,7 @@ router.get(
   async (req, res, next) => {
     try {
       data = await database
-        .select("id", "id_vehicle", "id_user")
+        .select("id", "id_vehicle", "start_at", "end_at")
         .from("pickup");
       res.json({ message: "Success", data });
     } catch (error) {
@@ -39,8 +40,8 @@ router.put(
   passport.authenticate("driver", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database("pickup_details").where("id", req.body.id).update({
-        accidents: req.body.accidents,
+      data = await database("pickup").where("id", req.body.id).update({
+        ready: req.body.accidents,
       });
       res.json({ message: "success", data });
     } catch (error) {

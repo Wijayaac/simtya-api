@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const database = require("../config/database");
 const passport = require("passport");
+const database = require("../config/database");
 const utils = require("../lib/utils");
 
 router.get("/", (req, res) => {
@@ -9,7 +9,7 @@ router.get("/", (req, res) => {
 
 router.post("/login", (req, res, next) => {
   database("users")
-    .where("username", "=", req.body.username)
+    .where("email", "=", req.body.email)
     .first()
     .then((user) => {
       if (!user) {
@@ -52,7 +52,7 @@ router.post("/register", (req, res, next) => {
         salt: salt,
         hash: hash,
         username: req.body.username,
-        role: req.body.role,
+        role: 1,
         email: req.body.email,
       },
       ["id", "role"]

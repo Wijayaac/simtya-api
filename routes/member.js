@@ -1,6 +1,7 @@
 const router = require("express").Router();
-const database = require("../config/database");
 const passport = require("passport");
+const database = require("../config/database");
+const upload = require("../config/upload");
 
 router.get("/", (req, res) => {
   res.json({ info: "Node.js, Express, and Postgres API Backend Member" });
@@ -24,7 +25,7 @@ router.get(
   async (req, res, next) => {
     try {
       data = await database
-        .select("id", "id_user", "id_vehicle")
+        .select("id", "start_at", "id_vehicle", "end_at")
         .from("pickup");
       res.json({ message: "success", data });
     } catch (error) {
@@ -68,11 +69,10 @@ router.put(
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database("passenger_details")
-        .where("id", req.body.id)
-        .update({
-          id_user: req.body.user,
-        });
+      data = await database("pickup_details").where("id", req.body.id).update({
+        id_user: req.body.user,
+        description: req.body.description,
+      });
       res.json({ message: "success", data });
     } catch (error) {
       res.json({ message: "error", error });
@@ -82,11 +82,19 @@ router.put(
 router.put(
   "/profile",
   passport.authenticate("member", { session: false }),
+  upload.single("photo"),
   async (req, res, next) => {
     try {
+      var insertFilename = "";
+      if (!req.file) {
+        insertFilename = req.body.oldFilename;
+      } else {
+        const { filename } = req.file;
+        insertFilename = filename;
+      }
       data = await database("users").where("id", req.body.id).update({
         name: req.body.name,
-        photo: req.body.photo,
+        photo: insertFilename,
         description: req.body.description,
       });
       res.json({ message: "success", data });

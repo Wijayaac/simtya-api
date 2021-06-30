@@ -24,6 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Allows our Angular application to make HTTP requests to Express application
 app.use(cors());
+app.use("/uploads", express.static("uploads"));
 
 /**
  * -------------- ROUTES ----------------
