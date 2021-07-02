@@ -80,6 +80,21 @@ router.get(
     }
   }
 );
+router.get(
+  "/inventory/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select("name", "photo", "years", "brand", "type", "description")
+        .from("vehicles")
+        .where("id", req.params.id);
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
 router.post(
   "/inventory",
   passport.authenticate("admin", { session: false }),
