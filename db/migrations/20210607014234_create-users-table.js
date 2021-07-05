@@ -29,8 +29,8 @@ exports.up = function (knex, Promise) {
       table.integer("id_user", 8);
       table.integer("start_km");
       table.integer("end_km");
-      table.date("start_at");
-      table.date("end_at");
+      table.timestamp("start_at", { useTz: false });
+      table.timestamp("end_at", { useTz: false });
       table.text("description");
       table.boolean("read");
       table.timestamps(true, true);
@@ -48,8 +48,8 @@ exports.up = function (knex, Promise) {
       table.integer("id_vehicle", 8);
       table.integer("start_km");
       table.integer("end_km");
-      table.date("start_at");
-      table.date("end_at");
+      table.timestamp("start_at", { useTz: false });
+      table.timestamp("end_at", { useTz: false });
       table.boolean("accidents");
       table.text("description");
       table.boolean("read");
@@ -65,10 +65,11 @@ exports.up = function (knex, Promise) {
     .createTable("pickup", (table) => {
       table.increments();
       table.integer("id_vehicle", 8);
+      table.string("route");
       table.integer("start_km");
       table.integer("end_km");
-      table.date("start_at");
-      table.date("end_at");
+      table.timestamp("start_at", { useTz: false });
+      table.timestamp("end_at", { useTz: false });
       table.boolean("accidents");
       table.text("description");
       table.boolean("ready");
@@ -87,7 +88,6 @@ exports.up = function (knex, Promise) {
 exports.down = function (knex, Promise) {
   return knex.schema
     .dropTable("users")
-    .dropTable("passenger_details")
     .dropTable("loan_details")
     .dropTable("pickup_details")
     .dropTable("service_details")

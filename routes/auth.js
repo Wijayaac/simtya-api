@@ -52,7 +52,7 @@ router.post("/register", (req, res, next) => {
         salt: salt,
         hash: hash,
         username: req.body.username,
-        role: 1,
+        role: 3,
         email: req.body.email,
       },
       ["id", "role"]
