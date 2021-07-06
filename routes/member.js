@@ -12,13 +12,50 @@ router.get(
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database.select("id", "id_user", "id_vehicle").from("loan");
+      data = await database
+        .select(
+          "id",
+          "purpose",
+          "accidents",
+          "start_at",
+          "end_at",
+          "description",
+          "id_vehicle"
+        )
+        .from("loan");
       res.json({ message: "success", data });
     } catch (error) {
       res.json({ message: "error", error });
     }
   }
 );
+
+router.get(
+  "/loan/:id",
+  passport.authenticate("member", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select(
+          "id",
+          "purpose",
+          "accidents",
+          "start_at",
+          "end_at",
+          "description",
+          "id_vehicle",
+          "start_km",
+          "end_km"
+        )
+        .from("loan")
+        .where("id", req.params.id);
+      res.json({ message: "success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+
 router.get(
   "/pickup",
   passport.authenticate("member", { session: false }),
@@ -54,6 +91,10 @@ router.post(
         {
           id_vehicle: req.body.vehicle,
           id_user: req.body.user,
+          purpose: req.body.purpose,
+          start_at: req.body.start_at,
+          end_at: req.body.end_at,
+          accidents: req.body.accidents,
           description: req.body.description,
         },
         "id"
@@ -64,6 +105,42 @@ router.post(
     }
   }
 );
+
+router.put(
+  "/loan",
+  passport.authenticate("member", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database("loan").where("id", req.body.id).update({
+        id_vehicle: req.body.id_vehicle,
+        purpose: req.body.purpose,
+        accidents: req.body.accidents,
+        start_at: req.body.start_at,
+        end_at: req.body.end_at,
+        start_km: req.body.start_km,
+        end_km: req.body.end_km,
+        description: req.body.description,
+      });
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+
+router.delete(
+  "/loan/:id",
+  passport.authenticate("member", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database("loan").where("id", req.params.id).del();
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+
 router.put(
   "/pickup",
   passport.authenticate("member", { session: false }),

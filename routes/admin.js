@@ -162,21 +162,17 @@ router.get(
     }
   }
 );
-router.get(
-  "/vehicle/:type",
-  passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
-    try {
-      const data = await database
-        .select("id", "name", "type")
-        .from("vehicles")
-        .where("type", req.params.type);
-      res.json({ message: "Success", data });
-    } catch (error) {
-      res.json({ message: "Error", error });
-    }
+router.get("/vehicle/:type", async (req, res, next) => {
+  try {
+    const data = await database
+      .select("id", "name", "type")
+      .from("vehicles")
+      .where("type", req.params.type);
+    res.json({ message: "Success", data });
+  } catch (error) {
+    res.json({ message: "Error", error });
   }
-);
+});
 router.post(
   "/inventory",
   passport.authenticate("admin", { session: false }),

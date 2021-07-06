@@ -31,6 +31,7 @@ exports.up = function (knex, Promise) {
       table.integer("end_km");
       table.timestamp("start_at", { useTz: false });
       table.timestamp("end_at", { useTz: false });
+      table.string("type");
       table.text("description");
       table.boolean("read");
       table.timestamps(true, true);
@@ -46,10 +47,12 @@ exports.up = function (knex, Promise) {
     .createTable("loan", (table) => {
       table.increments();
       table.integer("id_vehicle", 8);
+      table.integer("id_user", 8);
+      table.string("purpose");
       table.integer("start_km");
       table.integer("end_km");
-      table.timestamp("start_at", { useTz: false });
-      table.timestamp("end_at", { useTz: false });
+      table.date("start_at");
+      table.date("end_at");
       table.boolean("accidents");
       table.text("description");
       table.boolean("read");
