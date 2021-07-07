@@ -75,15 +75,17 @@ exports.up = function (knex, Promise) {
       table.timestamp("end_at", { useTz: false });
       table.boolean("accidents");
       table.text("description");
+      table.integer("slot", 2);
       table.boolean("ready");
       table.boolean("read");
       table.timestamps(true, true);
     })
     .createTable("pickup_details", (table) => {
       table.increments();
-      table.integer("id_pickup");
+      table.integer("id_pickup", 8);
       table.integer("id_user", 8);
       table.text("description");
+      table.boolean("active");
       table.timestamps(true, true);
     });
 };

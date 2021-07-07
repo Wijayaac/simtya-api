@@ -62,11 +62,20 @@ router.get(
   async (req, res, next) => {
     try {
       data = await database
-        .select("id", "start_at", "id_vehicle", "end_at")
-        .from("pickup");
-      res.json({ message: "success", data });
+        .select(
+          "pickup.id",
+          "pickup.route",
+          "pickup.start_at",
+          "pickup.end_at",
+          "pickup.slot",
+          "vehicles.name"
+        )
+        .from("pickup")
+        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .where("pickup.ready", true);
+      res.json({ message: "Success", data });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.json({ message: "Error", error });
     }
   }
 );
@@ -141,14 +150,19 @@ router.delete(
   }
 );
 
-router.put(
+router.post(
   "/pickup",
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database("pickup_details").where("id", req.body.id).update({
+      let slot = await database("pickup")
+        .where("id", req.body.pickup)
+        .decrement("slot", 1);
+      data = await database("pickup_details").insert({
         id_user: req.body.user,
+        id_pickup: req.body.pickup,
         description: req.body.description,
+        active: req.body.active,
       });
       res.json({ message: "success", data });
     } catch (error) {
@@ -177,6 +191,23 @@ router.put(
       res.json({ message: "success", data });
     } catch (error) {
       res.json({ message: "error", error });
+    }
+  }
+);
+router.get(
+  "/joinpickup/:sub",
+  passport.authenticate("member", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select("active", "created_at")
+        .from("pickup_details")
+        .where("id_user", req.params.sub)
+        .orderBy("id", "desc")
+        .first();
+      res.send(data);
+    } catch (error) {
+      res.send(error);
     }
   }
 );

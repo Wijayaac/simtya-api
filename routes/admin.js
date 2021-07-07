@@ -64,9 +64,9 @@ router.post(
           start_at: req.body.start_at,
           end_at: req.body.end_at,
           id_vehicle: req.body.vehicle,
-          description: req.body.description,
           read: false,
           ready: false,
+          slot: 12,
         },
         "id"
       );
@@ -87,7 +87,6 @@ router.put(
         route: req.body.route,
         start_at: req.body.start_at,
         end_at: req.body.end_at,
-        description: req.body.description,
       });
       res.json({ message: "Success", data });
     } catch (error) {
@@ -114,7 +113,18 @@ router.get(
   passport.authenticate("admin", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database.select("id", "start_at", "end_at").from("loan");
+      data = await database
+        .select(
+          "id",
+          "accidents",
+          "purpose",
+          "id_vehicle",
+          "id_user",
+          "description",
+          "start_at",
+          "end_at"
+        )
+        .from("loan");
       res.json({ message: "Success", data });
     } catch (error) {
       res.json({ message: "error", error });
@@ -233,6 +243,146 @@ router.delete(
       res.json({ message: "Success", data });
     } catch (error) {
       res.json({ message: "Error", data: error });
+    }
+  }
+);
+
+router.get(
+  "/loanlist",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select(
+          "loan.id",
+          "loan.accidents",
+          "loan.purpose",
+          "users.email",
+          "loan.description",
+          "loan.start_at",
+          "loan.end_at",
+          "vehicles.name"
+        )
+        .from("loan")
+        .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .innerJoin("users", "loan.id_user", "users.id");
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+router.get(
+  "/loanlist/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select(
+          "loan.id",
+          "loan.accidents",
+          "loan.purpose",
+          "users.email",
+          "loan.description",
+          "loan.start_at",
+          "loan.end_at",
+          "vehicles.name"
+        )
+        .from("loan")
+        .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .innerJoin("users", "loan.id_user", "users.id")
+        .where("loan.id", req.params.id);
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+
+router.get(
+  "/pickuplist",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select(
+          "pickup.id",
+          "pickup.route",
+          "pickup.start_at",
+          "pickup.end_at",
+          "pickup.ready",
+          "vehicles.name"
+        )
+        .from("pickup")
+        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id");
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+router.get(
+  "/pickuplist/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select(
+          "pickup.id",
+          "pickup.route",
+          "pickup.id_vehicle",
+          "pickup.start_at",
+          "pickup.end_at",
+          "pickup.ready",
+          "pickup.description",
+          "vehicles.name"
+        )
+        .from("pickup")
+        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .where("pickup.id", req.params.id);
+
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+router.get(
+  "/pickuphistory/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      pickup = await database
+        .select(
+          "pickup.route",
+          "pickup.description",
+          "pickup.id",
+          "pickup.id_vehicle",
+          "pickup.start_at",
+          "pickup.end_at",
+          "pickup.ready",
+          "vehicles.name"
+        )
+        .from("pickup")
+        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .where("pickup.id", req.params.id);
+      history = await database
+        .select(
+          "pickup_details.id",
+          "users.email",
+          "pickup_details.description",
+          "pickup_details.created_at"
+        )
+        .from("pickup_details")
+        .leftJoin("users", "pickup_details.id_user", "users.id")
+        .where("pickup_details.id_pickup", req.params.id)
+        .orderBy("pickup_details.id", "desc");
+      res.json({
+        pickup,
+        history,
+      });
+    } catch (error) {
+      res.send(error);
     }
   }
 );
