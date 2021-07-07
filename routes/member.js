@@ -100,19 +100,25 @@ router.post(
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database("loan").insert(
-        {
-          id_vehicle: req.body.vehicle,
-          id_user: req.body.user,
-          purpose: req.body.purpose,
-          start_at: req.body.start_at,
-          end_at: req.body.end_at,
-          accidents: req.body.accidents,
-          description: req.body.description,
-        },
-        "id"
+      let { rows } = await database.raw(
+        `select exists(select 1 from loan where start_at='${req.body.start_at}') as exists limit 1`
       );
-      res.json({ message: "success", data });
+      if (!rows[0].exists) {
+        data = await database("loan").insert(
+          {
+            id_vehicle: req.body.vehicle,
+            id_user: req.body.user,
+            purpose: req.body.purpose,
+            start_at: req.body.start_at,
+            end_at: req.body.end_at,
+            accidents: req.body.accidents,
+            description: req.body.description,
+          },
+          "id"
+        );
+        res.json({ message: "success", data });
+      }
+      res.json({ message: "error" });
     } catch (error) {
       res.json({ message: "error", error });
     }
