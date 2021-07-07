@@ -80,11 +80,15 @@ router.get(
   }
 );
 router.get(
-  "/profile",
+  "/profile/:id",
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database.select("id", "name", "description").from("users");
+      data = await database
+        .select("id", "name", "email", "username", "photo", "description")
+        .from("users")
+        .where("id", req.params.id)
+        .first();
       res.json({ message: "success", data });
     } catch (error) {
       res.json({ message: "error", error });
@@ -185,6 +189,8 @@ router.put(
       }
       data = await database("users").where("id", req.body.id).update({
         name: req.body.name,
+        email: req.body.email,
+        username: req.body.email,
         photo: insertFilename,
         description: req.body.description,
       });
