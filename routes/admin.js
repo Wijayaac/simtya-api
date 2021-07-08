@@ -258,7 +258,7 @@ router.get(
           "loan.accidents",
           "loan.purpose",
           "users.email",
-          "loan.description",
+          "users.username",
           "loan.start_at",
           "loan.end_at",
           "vehicles.name"
@@ -295,6 +295,37 @@ router.get(
       res.json({ message: "Success", data });
     } catch (error) {
       res.json({ message: "Error", error });
+    }
+  }
+);
+router.get(
+  "/loanhistory/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      history = await database
+        .select(
+          "loan.purpose",
+          "loan.description",
+          "loan.id",
+          "loan.id_vehicle",
+          "users.username",
+          "users.email",
+          "loan.start_at",
+          "loan.start_km",
+          "loan.end_km",
+          "loan.end_at",
+          "loan.accidents",
+          "vehicles.name"
+        )
+        .from("loan")
+        .leftJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .leftJoin("users", "loan.id_user", "users.id")
+        .where("loan.id", req.params.id)
+        .first();
+      res.json({ history });
+    } catch (error) {
+      res.send(error);
     }
   }
 );

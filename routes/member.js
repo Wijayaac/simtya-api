@@ -7,23 +7,35 @@ router.get("/", (req, res) => {
   res.json({ info: "Node.js, Express, and Postgres API Backend Member" });
 });
 
+router.get("/event/", async (req, res, next) => {
+  try {
+    data = await database
+      .select("loan.start_at", "vehicles.name")
+      .from("loan")
+      .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+      .orderBy("loan.start_at", "asc");
+    res.json({ message: "Success", data });
+  } catch (error) {
+    res.json({ message: "error", error });
+  }
+});
 router.get(
-  "/loan",
+  "/loanlist/:id",
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
       data = await database
         .select(
-          "id",
-          "purpose",
-          "accidents",
-          "start_at",
-          "end_at",
-          "description",
-          "id_vehicle"
+          "loan.id",
+          "loan.purpose",
+          "loan.start_at",
+          "loan.end_at",
+          "vehicles.name"
         )
-        .from("loan");
-      res.json({ message: "success", data });
+        .from("loan")
+        .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .where("loan.id_user", req.params.id);
+      res.json({ message: "Success", data });
     } catch (error) {
       res.json({ message: "error", error });
     }
@@ -101,9 +113,12 @@ router.post(
   async (req, res, next) => {
     try {
       let { rows } = await database.raw(
-        `select exists(select 1 from loan where start_at='${req.body.start_at}') as exists limit 1`
+        `select exists(select 1 from loan where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
       );
-      if (!rows[0].exists) {
+      let exists = await database.raw(
+        `select exists(select 1 from services where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
+      );
+      if (!rows[0].exists && !exists.rows[0].exists) {
         data = await database("loan").insert(
           {
             id_vehicle: req.body.vehicle,
@@ -118,7 +133,7 @@ router.post(
         );
         res.json({ message: "success", data });
       }
-      res.json({ message: "error" });
+      res.send(false);
     } catch (error) {
       res.json({ message: "error", error });
     }
@@ -223,5 +238,16 @@ router.get(
     }
   }
 );
+
+router.get("/exists/:date", async (req, res) => {
+  try {
+    let exists = await database.raw(
+      `select exists(select 1 from services where start_at='${req.params.date}') as exists limit 1`
+    );
+    res.send(exists.rows[0].exists);
+  } catch (error) {
+    res.send(error);
+  }
+});
 
 module.exports = router;
