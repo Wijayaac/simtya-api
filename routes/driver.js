@@ -8,11 +8,13 @@ router.get("/", (req, res) => {
 });
 
 router.get(
-  "/pickup",
+  "/pickup/:page",
   passport.authenticate("driver", { session: false }),
   async (req, res, next) => {
+    let currentPage = req.params.page;
+    let perPage = 1;
     try {
-      data = await database
+      let data = await database
         .select(
           "pickup.id",
           "pickup.route",
@@ -22,10 +24,18 @@ router.get(
           "vehicles.name"
         )
         .from("pickup")
-        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id");
-      res.json({ message: "Success", data });
+        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("pickup").count("id").first();
+      res.status(200).json({
+        message: "Success",
+        data,
+        perPage: parseInt(perPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(400).json({ message: "Error", error });
     }
   }
 );
@@ -113,24 +123,33 @@ router.put(
   }
 );
 router.get(
-  "/service",
+  "/service/:page",
   passport.authenticate("driver", { session: false }),
   async (req, res, next) => {
+    let currentPage = req.params.page;
+    let perPage = 1;
     try {
-      data = await database
+      let data = await database
         .select(
-          "id",
-          "id_user",
-          "id_vehicle",
-          "type",
-          "description",
-          "start_at",
-          "end_at"
+          "services.id",
+          "services.type",
+          "services.start_at",
+          "services.end_at",
+          "vehicles.name"
         )
-        .from("services");
-      res.json({ message: "Success", data });
+        .from("services")
+        .leftJoin("vehicles", "services.id_vehicle", "vehicles.id")
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("services").count("id").first();
+      res.status(200).json({
+        message: "Success",
+        data,
+        perPage: parseInt(perPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(400).json({ message: "error", error });
     }
   }
 );
@@ -139,18 +158,27 @@ router.post(
   passport.authenticate("driver", { session: false }),
   async (req, res, next) => {
     try {
-      data = await database("services").insert(
-        {
-          id_vehicle: req.body.vehicle,
-          start_at: req.body.start_at,
-          end_at: req.body.end_at,
-          type: req.body.type,
-          id_user: 2,
-          description: req.body.description,
-        },
-        "id"
+      let { rows } = await database.raw(
+        `select exists(select 1 from loan where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
       );
-      res.json({ message: "success", data });
+      let exists = await database.raw(
+        `select exists(select 1 from services where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
+      );
+      if (!rows[0].exists && !exists.rows[0].exists) {
+        data = await database("services").insert(
+          {
+            id_vehicle: req.body.vehicle,
+            start_at: req.body.start_at,
+            end_at: req.body.end_at,
+            type: req.body.type,
+            id_user: 2,
+            description: req.body.description,
+          },
+          "id"
+        );
+        res.json({ message: "success", data });
+      }
+      res.send(false);
     } catch (error) {
       res.json({ message: "error", error });
     }

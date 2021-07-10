@@ -9,22 +9,29 @@ router.get("/", (req, res) => {
 
 router.get("/event/", async (req, res, next) => {
   try {
-    data = await database
+    loan = await database
       .select("loan.start_at", "vehicles.name")
       .from("loan")
       .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
       .orderBy("loan.start_at", "asc");
-    res.json({ message: "Success", data });
+    service = await database
+      .select("services.start_at", "vehicles.name")
+      .from("services")
+      .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
+      .orderBy("services.start_at", "asc");
+    res.json({ message: "Success", loan, service });
   } catch (error) {
     res.json({ message: "error", error });
   }
 });
 router.get(
-  "/loanlist/:id",
+  "/loanlist/:id/:page",
   passport.authenticate("member", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
+    const currentPage = req.params.page || 1;
+    const perPage = 2;
     try {
-      data = await database
+      const list = await database
         .select(
           "loan.id",
           "loan.purpose",
@@ -34,10 +41,21 @@ router.get(
         )
         .from("loan")
         .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
-        .where("loan.id_user", req.params.id);
-      res.json({ message: "Success", data });
+        .where("loan.id_user", req.params.id)
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("loan")
+        .count("id")
+        .where("id_user", req.params.id)
+        .first();
+      res.status(200).json({
+        message: "Fetched loanlist",
+        list,
+        currentPage: parseInt(currentPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.json({ message: "Error", error });
     }
   }
 );
@@ -69,11 +87,13 @@ router.get(
 );
 
 router.get(
-  "/pickup",
+  "/pickup/:page",
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
+    let currentPage = req.params.page;
+    let perPage = 1;
     try {
-      data = await database
+      let data = await database
         .select(
           "pickup.id",
           "pickup.route",
@@ -84,8 +104,19 @@ router.get(
         )
         .from("pickup")
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
-        .where("pickup.ready", true);
-      res.json({ message: "Success", data });
+        .where("pickup.ready", true)
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("pickup")
+        .count("id")
+        .where("ready", true)
+        .first();
+      res.status(200).json({
+        message: "Fetched Pickup list",
+        data,
+        currentPage: parseInt(currentPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
       res.json({ message: "Error", error });
     }

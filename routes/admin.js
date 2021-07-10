@@ -3,9 +3,21 @@ const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
 
-router.get("/", (req, res) => {
-  res.json({ info: "Node.js, Express, and Postgres API Backend admin" });
-});
+router.get(
+  "/",
+  passport.authenticate("admin", { session: false }),
+  async (req, res) => {
+    try {
+      let { rows } = await database.raw(
+        "SELECT COUNT(id),type from vehicles GROUP BY type"
+      );
+
+      res.send(rows);
+    } catch (error) {
+      res.send(error);
+    }
+  }
+);
 
 router.get(
   "/pickup",
@@ -132,14 +144,34 @@ router.get(
   }
 );
 router.get(
-  "/service",
+  "/service/:page",
   passport.authenticate("admin", { session: false }),
   async (req, res, next) => {
+    let currentPage = req.params.page;
+    let perPage = 2;
     try {
-      data = await database.select("id", "start_at", "end_at").from("service");
-      res.json({ message: "Success", data });
+      let data = await database
+        .select(
+          "services.id",
+          "services.description",
+          "services.type",
+          "services.start_at",
+          "services.end_at",
+          "vehicles.name"
+        )
+        .from("services")
+        .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("services").count("id").first();
+      res.status(200).json({
+        message: "Success",
+        data,
+        perPage: parseInt(perPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(400).json({ message: "Error", error });
     }
   }
 );
@@ -248,11 +280,13 @@ router.delete(
 );
 
 router.get(
-  "/loanlist",
+  "/loanlist/:page",
   passport.authenticate("admin", { session: false }),
   async (req, res, next) => {
+    let currentPage = req.params.page;
+    let perPage = 2;
     try {
-      data = await database
+      let data = await database
         .select(
           "loan.id",
           "loan.accidents",
@@ -265,15 +299,23 @@ router.get(
         )
         .from("loan")
         .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
-        .innerJoin("users", "loan.id_user", "users.id");
-      res.json({ message: "Success", data });
+        .innerJoin("users", "loan.id_user", "users.id")
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("loan").count("id").first();
+      res.status(200).json({
+        message: "Success",
+        data,
+        perPage: parseInt(perPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(400).json({ message: "Error", error });
     }
   }
 );
 router.get(
-  "/loanlist/:id",
+  "/loan/:id",
   passport.authenticate("admin", { session: false }),
   async (req, res, next) => {
     try {
@@ -331,11 +373,13 @@ router.get(
 );
 
 router.get(
-  "/pickuplist",
+  "/pickuplist/:page",
   passport.authenticate("admin", { session: false }),
   async (req, res, next) => {
+    let currentPage = req.params.page;
+    let perPage = 1;
     try {
-      data = await database
+      let data = await database
         .select(
           "pickup.id",
           "pickup.route",
@@ -345,8 +389,16 @@ router.get(
           "vehicles.name"
         )
         .from("pickup")
-        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id");
-      res.json({ message: "Success", data });
+        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .limit(perPage)
+        .offset((currentPage - 1) * perPage);
+      let { count } = await database("pickup").count("id").first();
+      res.json({
+        message: "Success",
+        data,
+        perPage: parseInt(perPage),
+        maxPage: Math.ceil(count / perPage),
+      });
     } catch (error) {
       res.json({ message: "Error", error });
     }
@@ -412,6 +464,62 @@ router.get(
         pickup,
         history,
       });
+    } catch (error) {
+      res.send(error);
+    }
+  }
+);
+
+router.get(
+  "/servicedetail/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      data = await database
+        .select(
+          "services.id",
+          "services.type",
+          "services.start_km",
+          "services.end_km",
+          "services.description",
+          "services.start_at",
+          "services.end_at",
+          "vehicles.name"
+        )
+        .from("services")
+        .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
+        .innerJoin("users", "services.id_user", "users.id")
+        .where("services.id", req.params.id);
+      res.json({ message: "Success", data });
+    } catch (error) {
+      res.json({ message: "Error", error });
+    }
+  }
+);
+router.get(
+  "/servicehistory/:id",
+  passport.authenticate("admin", { session: false }),
+  async (req, res, next) => {
+    try {
+      history = await database
+        .select(
+          "services.type",
+          "services.description",
+          "services.id",
+          "services.id_vehicle",
+          "users.email",
+          "services.start_at",
+          "services.start_km",
+          "services.end_km",
+          "services.end_at",
+          "vehicles.name"
+        )
+        .from("services")
+        .leftJoin("vehicles", "services.id_vehicle", "vehicles.id")
+        .leftJoin("users", "services.id_user", "users.id")
+        .where("services.id", req.params.id)
+        .first();
+      res.json({ history });
     } catch (error) {
       res.send(error);
     }

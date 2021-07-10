@@ -29,8 +29,8 @@ exports.up = function (knex, Promise) {
       table.integer("id_user", 8);
       table.integer("start_km");
       table.integer("end_km");
-      table.timestamp("start_at", { useTz: false });
-      table.timestamp("end_at", { useTz: false });
+      table.date("start_at");
+      table.date("end_at");
       table.string("type");
       table.text("description");
       table.boolean("read");

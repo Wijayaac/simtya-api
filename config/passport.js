@@ -36,7 +36,7 @@ module.exports = (passport) => {
         .where("id", "=", payload.sub)
         .first()
         .then((user) => {
-          if (user) {
+          if (user.role == 3) {
             return done(null, user);
           } else {
             return done(null, false);
@@ -52,7 +52,7 @@ module.exports = (passport) => {
         .where("id", "=", payload.sub)
         .first()
         .then((user) => {
-          if (user) {
+          if (user.role == 2) {
             return done(null, user);
           } else {
             return done(null, false);
