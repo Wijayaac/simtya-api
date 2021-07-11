@@ -7,7 +7,7 @@ router.get("/", (req, res) => {
   res.json({ info: "Node.js, Express, and Postgres API Backend Member" });
 });
 
-router.get("/event/", async (req, res, next) => {
+router.get("/event", async (req, res, next) => {
   try {
     loan = await database
       .select("loan.start_at", "vehicles.name")

@@ -186,7 +186,7 @@ router.post(
 );
 
 router.get(
-  "/service/:id",
+  "/servicedetail/:id",
   passport.authenticate("driver", { session: false }),
   async (req, res, next) => {
     try {
