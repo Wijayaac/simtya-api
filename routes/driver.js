@@ -3,14 +3,10 @@ const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
 
-router.get("/", (req, res) => {
-  res.json({ info: "Node.js, Express, and Postgres API Backend driver" });
-});
-
 router.get(
   "/pickup/:page",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     let currentPage = req.params.page;
     let perPage = 1;
     try {
@@ -29,20 +25,23 @@ router.get(
         .offset((currentPage - 1) * perPage);
       let { count } = await database("pickup").count("id").first();
       res.status(200).json({
-        message: "Success",
+        success: true,
+        message: "Success processing that data",
         data,
         perPage: parseInt(perPage),
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(400).json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Error processing that data", error });
     }
   }
 );
 router.get(
   "/pickuphistory/:id",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       pickup = await database
         .select(
@@ -70,19 +69,23 @@ router.get(
         .leftJoin("users", "pickup_details.id_user", "users.id")
         .where("pickup_details.id_pickup", req.params.id)
         .orderBy("pickup_details.id", "desc");
-      res.json({
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
         pickup,
         history,
       });
     } catch (error) {
-      res.send(error);
+      res
+        .status(401)
+        .json({ success: false, message: "Error processing that data", error });
     }
   }
 );
 router.get(
   "/pickup/:id",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -98,16 +101,24 @@ router.get(
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .where("pickup.id", req.params.id);
 
-      res.json({ message: "Success", data });
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
 router.put(
   "/pickup",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("pickup").where("id", req.body.id).update({
         ready: req.body.ready,
@@ -116,16 +127,24 @@ router.put(
         start_km: req.body.start_km,
         end_km: req.body.end_km,
       });
-      res.json({ message: "success", data });
+      res.status(200).json({
+        success: true,
+        message: "success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(401).json({
+        success: false,
+        message: "error processing that data",
+        error,
+      });
     }
   }
 );
 router.get(
   "/service/:page",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     let currentPage = req.params.page;
     let perPage = 1;
     try {
@@ -143,20 +162,23 @@ router.get(
         .offset((currentPage - 1) * perPage);
       let { count } = await database("services").count("id").first();
       res.status(200).json({
-        message: "Success",
+        success: true,
+        message: "Success processing that data",
         data,
         perPage: parseInt(perPage),
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(400).json({ message: "error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "error processing that data", error });
     }
   }
 );
 router.post(
   "/service",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       let { rows } = await database.raw(
         `select exists(select 1 from loan where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
@@ -176,11 +198,19 @@ router.post(
           },
           "id"
         );
-        res.json({ message: "success", data });
+        res.status(200).json({
+          success: true,
+          message: "success processing that data",
+          data,
+        });
       }
       res.send(false);
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(401).json({
+        success: false,
+        message: "error processing that data",
+        error,
+      });
     }
   }
 );
@@ -188,7 +218,7 @@ router.post(
 router.get(
   "/servicedetail/:id",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -203,9 +233,17 @@ router.get(
         )
         .from("services")
         .where("id", req.params.id);
-      res.json({ message: "Success", data });
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -213,12 +251,20 @@ router.get(
 router.delete(
   "/service/:id",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("services").where("id", req.params.id).del();
-      res.json({ message: "Success", data });
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -226,7 +272,7 @@ router.delete(
 router.put(
   "/service",
   passport.authenticate("driver", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("services").where("id", req.body.id).update(
         {
@@ -240,9 +286,17 @@ router.put(
         },
         "id"
       );
-      res.json({ message: "Success", data });
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );

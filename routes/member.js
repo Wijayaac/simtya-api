@@ -3,10 +3,6 @@ const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
 
-router.get("/", (req, res) => {
-  res.json({ info: "Node.js, Express, and Postgres API Backend Member" });
-});
-
 router.get("/event", async (req, res, next) => {
   try {
     loan = await database
@@ -19,9 +15,16 @@ router.get("/event", async (req, res, next) => {
       .from("services")
       .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
       .orderBy("services.start_at", "asc");
-    res.json({ message: "Success", loan, service });
+    res.status(200).json({
+      success: true,
+      message: "Success processing that data",
+      loan,
+      service,
+    });
   } catch (error) {
-    res.json({ message: "error", error });
+    res
+      .status(401)
+      .json({ success: false, message: "error processing that data", error });
   }
 });
 router.get(
@@ -55,7 +58,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -79,9 +86,17 @@ router.get(
         )
         .from("loan")
         .where("id", req.params.id);
-      res.json({ message: "success", data });
+      res.status(200).json({
+        success: true,
+        message: "success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -118,7 +133,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -132,9 +151,17 @@ router.get(
         .from("users")
         .where("id", req.params.id)
         .first();
-      res.json({ message: "success", data });
+      res.status(200).json({
+        success: true,
+        message: "success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(401).json({
+        success: false,
+        message: "error processing that data",
+        error,
+      });
     }
   }
 );
@@ -162,11 +189,19 @@ router.post(
           },
           "id"
         );
-        res.json({ message: "success", data });
+        res.status(200).json({
+          success: true,
+          message: "success processing that data",
+          data,
+        });
       }
-      res.send(false);
+      res.status(403).send(false);
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(401).json({
+        success: false,
+        message: "error processing that data",
+        error,
+      });
     }
   }
 );
@@ -186,9 +221,17 @@ router.put(
         end_km: req.body.end_km,
         description: req.body.description,
       });
-      res.json({ message: "Success", data });
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -199,9 +242,17 @@ router.delete(
   async (req, res, next) => {
     try {
       data = await database("loan").where("id", req.params.id).del();
-      res.json({ message: "Success", data });
+      res.status(200).json({
+        success: true,
+        message: "Success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res.status(401).json({
+        success: false,
+        message: "Error processing that data",
+        error,
+      });
     }
   }
 );
@@ -211,7 +262,7 @@ router.post(
   passport.authenticate("member", { session: false }),
   async (req, res, next) => {
     try {
-      let slot = await database("pickup")
+      await database("pickup")
         .where("id", req.body.pickup)
         .decrement("slot", 1);
       data = await database("pickup_details").insert({
@@ -220,9 +271,17 @@ router.post(
         description: req.body.description,
         active: req.body.active,
       });
-      res.json({ message: "success", data });
+      res.status(200).json({
+        success: true,
+        message: "success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(401).json({
+        success: false,
+        message: "error processing that data",
+        error,
+      });
     }
   }
 );
@@ -246,9 +305,17 @@ router.put(
         photo: insertFilename,
         description: req.body.description,
       });
-      res.json({ message: "success", data });
+      res.status(200).json({
+        success: true,
+        message: "success processing that data",
+        data,
+      });
     } catch (error) {
-      res.json({ message: "error", error });
+      res.status(401).json({
+        success: false,
+        message: "error processing that data",
+        error,
+      });
     }
   }
 );
@@ -263,9 +330,13 @@ router.get(
         .where("id_user", req.params.sub)
         .orderBy("id", "desc")
         .first();
-      res.send(data);
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing that data", data });
     } catch (error) {
-      res.send(error);
+      res
+        .status()
+        .json({ success: false, message: "Error processing that data", error });
     }
   }
 );
@@ -275,9 +346,9 @@ router.get("/exists/:date", async (req, res) => {
     let exists = await database.raw(
       `select exists(select 1 from services where start_at='${req.params.date}') as exists limit 1`
     );
-    res.send(exists.rows[0].exists);
+    res.status(200).send(exists.rows[0].exists);
   } catch (error) {
-    res.send(error);
+    res.status(401).send(error);
   }
 });
 

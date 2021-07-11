@@ -3,10 +3,6 @@ const passport = require("passport");
 const database = require("../config/database");
 const utils = require("../lib/utils");
 
-router.get("/", (req, res) => {
-  res.json({ info: "Node JS Backedn API" });
-});
-
 router.post("/login", (req, res, next) => {
   database("users")
     .where("email", "=", req.body.email)

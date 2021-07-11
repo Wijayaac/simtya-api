@@ -11,10 +11,13 @@ router.get(
       let { rows } = await database.raw(
         "SELECT COUNT(id),type from vehicles GROUP BY type"
       );
-
-      res.send(rows);
+      res
+        .status(200)
+        .json({ success: true, message: "Success getting that data", rows });
     } catch (error) {
-      res.send(error);
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -35,9 +38,13 @@ router.get(
           "ready"
         )
         .from("pickup");
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -58,9 +65,13 @@ router.get(
         )
         .from("pickup")
         .where("id", req.params.id);
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -82,9 +93,13 @@ router.post(
         },
         "id"
       );
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -100,9 +115,13 @@ router.put(
         start_at: req.body.start_at,
         end_at: req.body.end_at,
       });
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -113,9 +132,13 @@ router.delete(
   async (req, res, next) => {
     try {
       data = await database("pickup").where("id", req.params.id).del();
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -137,9 +160,13 @@ router.get(
           "end_at"
         )
         .from("loan");
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -165,13 +192,16 @@ router.get(
         .offset((currentPage - 1) * perPage);
       let { count } = await database("services").count("id").first();
       res.status(200).json({
-        message: "Success",
+        success: true,
+        message: "Success processing data",
         data,
         perPage: parseInt(perPage),
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(400).json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -183,9 +213,11 @@ router.get(
       data = await database
         .select("id", "name", "photo", "years", "brand", "type", "description")
         .from("vehicles");
-      res.json(data);
+      res.status(200).json(data);
     } catch (error) {
-      res.json({ message: "error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -198,9 +230,13 @@ router.get(
         .select("id", "name", "photo", "years", "brand", "type", "description")
         .from("vehicles")
         .where("id", req.params.id);
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -210,9 +246,13 @@ router.get("/vehicle/:type", async (req, res, next) => {
       .select("id", "name", "type")
       .from("vehicles")
       .where("type", req.params.type);
-    res.json({ message: "Success", data });
+    res
+      .status(200)
+      .json({ success: true, message: "Success processing data", data });
   } catch (error) {
-    res.json({ message: "Error", error });
+    res
+      .status(401)
+      .json({ success: false, message: "Cannot proceed that request" });
   }
 });
 router.post(
@@ -233,9 +273,13 @@ router.post(
         },
         "name"
       );
-      res.json({ message: "success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "success processing data", data });
     } catch (error) {
-      res.json({ error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -260,9 +304,13 @@ router.put(
         photo: insertFilename,
         description: req.body.description,
       });
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error update", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -272,9 +320,13 @@ router.delete(
   async (req, res, next) => {
     try {
       data = await database("vehicles").where("id", req.params.id).del();
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", data: error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -304,13 +356,16 @@ router.get(
         .offset((currentPage - 1) * perPage);
       let { count } = await database("loan").count("id").first();
       res.status(200).json({
-        message: "Success",
+        success: true,
+        message: "Success processing data",
         data,
         perPage: parseInt(perPage),
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(400).json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -334,9 +389,13 @@ router.get(
         .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
         .innerJoin("users", "loan.id_user", "users.id")
         .where("loan.id", req.params.id);
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -365,9 +424,11 @@ router.get(
         .leftJoin("users", "loan.id_user", "users.id")
         .where("loan.id", req.params.id)
         .first();
-      res.json({ history });
+      res.status(200).json({ history });
     } catch (error) {
-      res.send(error);
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -393,14 +454,17 @@ router.get(
         .limit(perPage)
         .offset((currentPage - 1) * perPage);
       let { count } = await database("pickup").count("id").first();
-      res.json({
-        message: "Success",
+      res.status(200).json({
+        success: true,
+        message: "Success processing data",
         data,
         perPage: parseInt(perPage),
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -424,9 +488,13 @@ router.get(
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .where("pickup.id", req.params.id);
 
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -460,12 +528,14 @@ router.get(
         .leftJoin("users", "pickup_details.id_user", "users.id")
         .where("pickup_details.id_pickup", req.params.id)
         .orderBy("pickup_details.id", "desc");
-      res.json({
+      res.status(200).json({
         pickup,
         history,
       });
     } catch (error) {
-      res.send(error);
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -490,9 +560,13 @@ router.get(
         .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
         .innerJoin("users", "services.id_user", "users.id")
         .where("services.id", req.params.id);
-      res.json({ message: "Success", data });
+      res
+        .status(200)
+        .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.json({ message: "Error", error });
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
@@ -519,9 +593,11 @@ router.get(
         .leftJoin("users", "services.id_user", "users.id")
         .where("services.id", req.params.id)
         .first();
-      res.json({ history });
+      res.status(200).json({ history });
     } catch (error) {
-      res.send(error);
+      res
+        .status(401)
+        .json({ success: false, message: "Cannot proceed that request" });
     }
   }
 );
