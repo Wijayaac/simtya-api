@@ -24,7 +24,11 @@ router.get("/event", async (req, res, next) => {
   } catch (error) {
     res
       .status(401)
-      .json({ success: false, message: "error processing that data", error });
+      .json({
+        success: false,
+        message: "Oops you hit an error, try again later ya...",
+        error,
+      });
   }
 });
 router.get(
@@ -60,7 +64,7 @@ router.get(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "Error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -94,7 +98,7 @@ router.get(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "Error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -135,7 +139,7 @@ router.get(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "Error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -159,7 +163,7 @@ router.get(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -199,7 +203,7 @@ router.post(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -229,7 +233,7 @@ router.put(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "Error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -250,7 +254,7 @@ router.delete(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "Error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -279,7 +283,7 @@ router.post(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -313,7 +317,7 @@ router.put(
     } catch (error) {
       res.status(401).json({
         success: false,
-        message: "error processing that data",
+        message: "Oops you hit an error, try again later ya...",
         error,
       });
     }
@@ -336,7 +340,11 @@ router.get(
     } catch (error) {
       res
         .status()
-        .json({ success: false, message: "Error processing that data", error });
+        .json({
+          success: false,
+          message: "Oops you hit an error, try again later ya...",
+          error,
+        });
     }
   }
 );

@@ -19,6 +19,8 @@ exports.up = function (knex, Promise) {
       table.string("type", 20);
       table.string("brand", 20);
       table.integer("years", 5);
+      table.integer("km", 8);
+      table.integer("now_km", 8);
       table.string("photo");
       table.text("description");
       table.timestamps(true, true);

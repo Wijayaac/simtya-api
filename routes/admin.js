@@ -2,6 +2,88 @@ const router = require("express").Router();
 const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
+const pdf = require("html-pdf");
+const fs = require("fs");
+const path = require("path");
+
+// init the html builder
+const inventoryHTML = require("../documents").inventoryHTML;
+const pickupHTML = require("../documents").pickupHTML;
+const serviceHTML = require("../documents").serviceHTML;
+const loanHTML = require("../documents").loanHTML;
+var options = { format: "Letter" };
+
+var inventoryTemplate = fs.readFileSync(
+  `${path.join(__dirname, "..", "documents", "inventory.html")}`,
+  "utf-8"
+);
+var serviceTemplate = fs.readFileSync(
+  `${path.join(__dirname, "..", "documents", "service.html")}`,
+  "utf-8"
+);
+var loanTemplate = fs.readFileSync(
+  `${path.join(__dirname, "..", "documents", "loan.html")}`,
+  "utf-8"
+);
+var pickupTemplate = fs.readFileSync(
+  `${path.join(__dirname, "..", "documents", "pickup.html")}`,
+  "utf-8"
+);
+
+// testing create and send pdf into client
+router.get("/inventory-pdf", async (req, res) => {
+  inventoryHTML();
+  try {
+    await pdf
+      .create(inventoryTemplate, options)
+      .toFile("inventory.pdf", (err) => {
+        if (err)
+          res.json({ success: false, message: "Oops you hit an error", err });
+        res.sendFile("inventory.pdf", { root: "." });
+      });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error occured", error });
+  }
+});
+// testing create and send pdf into client
+router.get("/pickup-pdf", async (req, res) => {
+  pickupHTML();
+  try {
+    await pdf.create(pickupTemplate, options).toFile("pickup.pdf", (err) => {
+      if (err)
+        res.json({ success: false, message: "Oops you hit an error", err });
+      res.sendFile("pickup.pdf", { root: "." });
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error occured", error });
+  }
+});
+// testing create and send pdf into client
+router.get("/loan-pdf", async (req, res) => {
+  loanHTML();
+  try {
+    await pdf.create(loanTemplate, options).toFile("loan.pdf", (err) => {
+      if (err)
+        res.json({ success: false, message: "Oops you hit an error", err });
+      res.sendFile("loan.pdf", { root: "." });
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error occured", error });
+  }
+});
+// testing create and send pdf into client
+router.get("/service-pdf", async (req, res) => {
+  serviceHTML();
+  try {
+    await pdf.create(serviceTemplate, options).toFile("service.pdf", (err) => {
+      if (err)
+        res.json({ success: false, message: "Oops you hit an error", err });
+      res.sendFile("service.pdf", { root: "." });
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error occured", error });
+  }
+});
 
 router.get(
   "/",
@@ -15,9 +97,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success getting that data", rows });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -42,9 +126,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -69,9 +155,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -97,9 +185,11 @@ router.post(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -119,9 +209,11 @@ router.put(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -136,9 +228,11 @@ router.delete(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -164,9 +258,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -199,9 +295,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -215,9 +313,11 @@ router.get(
         .from("vehicles");
       res.status(200).json(data);
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -234,9 +334,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -250,9 +352,11 @@ router.get("/vehicle/:type", async (req, res, next) => {
       .status(200)
       .json({ success: true, message: "Success processing data", data });
   } catch (error) {
-    res
-      .status(401)
-      .json({ success: false, message: "Cannot proceed that request" });
+    res.status(401).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      error,
+    });
   }
 });
 router.post(
@@ -277,9 +381,11 @@ router.post(
         .status(200)
         .json({ success: true, message: "success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -308,9 +414,11 @@ router.put(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -324,9 +432,11 @@ router.delete(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -363,9 +473,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -393,9 +505,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -426,9 +540,11 @@ router.get(
         .first();
       res.status(200).json({ history });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -462,9 +578,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -492,9 +610,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -533,9 +653,11 @@ router.get(
         history,
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -564,9 +686,11 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
@@ -595,9 +719,11 @@ router.get(
         .first();
       res.status(200).json({ history });
     } catch (error) {
-      res
-        .status(401)
-        .json({ success: false, message: "Cannot proceed that request" });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya....",
+        error,
+      });
     }
   }
 );
