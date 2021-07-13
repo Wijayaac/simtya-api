@@ -327,7 +327,17 @@ router.get(
   async (req, res, next) => {
     try {
       data = await database
-        .select("id", "name", "photo", "years", "brand", "type", "description")
+        .select(
+          "id",
+          "name",
+          "photo",
+          "years",
+          "brand",
+          "type",
+          "now_km",
+          "km",
+          "description"
+        )
         .from("vehicles")
         .where("id", req.params.id);
       res
@@ -371,6 +381,8 @@ router.post(
           name: req.body.name,
           type: req.body.type,
           brand: req.body.brand,
+          km: req.body.km,
+          now_km: req.body.now,
           years: req.body.years,
           photo: filename,
           description: req.body.description,
@@ -406,6 +418,8 @@ router.put(
         name: req.body.name,
         type: req.body.type,
         brand: req.body.brand,
+        km: req.body.km,
+        now_km: req.body.now,
         years: req.body.years,
         photo: insertFilename,
         description: req.body.description,

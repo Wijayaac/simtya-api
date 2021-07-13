@@ -2,6 +2,12 @@ const router = require("express").Router();
 const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
+const TelegramBot = require("node-telegram-bot-api");
+require("dotenv").config();
+
+const token = process.env.TELEGRAM_TOKEN;
+const chatId = process.env.TELEGRAM_GROUP;
+const bot = new TelegramBot(token, { polling: true });
 
 router.get(
   "/pickup/:page",
@@ -32,13 +38,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          message: "Oops you hit an error, try again later ya...",
-          error,
-        });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya...",
+        error,
+      });
     }
   }
 );
@@ -80,13 +84,11 @@ router.get(
         history,
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          message: "Oops you hit an error, try again later ya...",
-          error,
-        });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya...",
+        error,
+      });
     }
   }
 );
@@ -135,6 +137,8 @@ router.put(
         start_km: req.body.start_km,
         end_km: req.body.end_km,
       });
+
+      if (req.body.ready) bot.sendMessage(chatId, "Penjemputan Ready");
       res.status(200).json({
         success: true,
         message: "success processing that data",
@@ -177,13 +181,11 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res
-        .status(401)
-        .json({
-          success: false,
-          message: "Oops you hit an error, try again later ya...",
-          error,
-        });
+      res.status(401).json({
+        success: false,
+        message: "Oops you hit an error, try again later ya...",
+        error,
+      });
     }
   }
 );
