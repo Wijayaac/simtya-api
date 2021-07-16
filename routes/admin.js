@@ -87,7 +87,7 @@ router.get("/service-pdf", async (req, res) => {
 
 router.get(
   "/",
-  passport.authenticate("admin", { session: false }),
+  // passport.authenticate("admin", { session: false }),
   async (req, res) => {
     try {
       let { rows } = await database.raw(

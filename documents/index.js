@@ -133,17 +133,17 @@ const buildInventoryHTML = () => {
               </tr>
               <tr class="item">
                  <td>First item:</td>
-                 <td>${type}$</td>
-                 <td>${kilometer}$</td>
+                 <td>Car</td>
+                 <td>128937</td>
               </tr>
               <tr class="item">
                  <td>Second item:</td>
-                 <td>${type}$</td>
-                 <td>${kilometer}$</td>
+                 <td>Motorcycle</td>
+                 <td>256398</td>
               </tr>
            </table>
            <br />
-           <h3 class="justify-center">Total Inventory:${total}</h3>
+           <h3 class="justify-center">Total Inventory:2</h3>
         </div>
      </body>
   </html>
@@ -198,20 +198,20 @@ const buildPickupHTML = () => {
                  <td>Times :</td>
               </tr>
               <tr class="item">
-                 <td>First item:</td>
-                 <td>${type}$</td>
-                 <td>${total}$</td>
+                 <td>Kia Travello Baru</td>
+                 <td>Car</td>
+                 <td>5</td>
               </tr>
               <tr class="item">
-                 <td>Second item:</td>
-                 <td>${type}$</td>
-                 <td>${total}$</td>
+                 <td>Kia Pregio</td>
+                 <td>Car</td>
+                 <td>4</td>
               </tr>
            </table>
            <br />
            <div class="justify-content-between">
-               <h3 class="justify-center">Total Pickup:${total}</h3>
-               <h3 class="justify-center">Total Usage:${kilometer}</h3>
+               <h3 class="justify-center">Total Pickup:9</h3>
+               <h3 class="justify-center">Total Usage:213761</h3>
            </div>
         </div>
      </body>
@@ -265,20 +265,20 @@ const buildServiceHTML = () => {
                   <td>Cost :</td>
                </tr>
                <tr class="item">
-                  <td>First item:</td>
-                  <td>${type}$</td>
-                  <td>${cost}$</td>
+                  <td>Red Scooter</td>
+                  <td>Motorcycle</td>
+                  <td>200000</td>
                </tr>
                <tr class="item">
-                  <td>Second item:</td>
-                  <td>${type}$</td>
-                  <td>${cost}$</td>
+                  <td>White Scooter</td>
+                  <td>Motorcycle</td>
+                  <td>300000</td>
                </tr>
             </table>
             <br />
             <div class="justify-content-between">
-                <h3 class="justify-center">Total Service:${total}</h3>
-                <h3 class="justify-center">Costs:${cost}</h3>
+                <h3 class="justify-center">Total Service:2</h3>
+                <h3 class="justify-center">Costs:500000</h3>
             </div>
          </div>
       </body>
@@ -332,20 +332,20 @@ const buildLoanHTML = () => {
                  <td>Usage :</td>
               </tr>
               <tr class="item">
-                 <td>First item:</td>
-                 <td>${type}$</td>
-                 <td>${kilometer}$</td>
+                 <td>White Scooter</td>
+                 <td>Motorcycle</td>
+                 <td>2137521</td>
               </tr>
               <tr class="item">
-                 <td>Second item:</td>
-                 <td>${type}$</td>
-                 <td>${kilometer}$</td>
+                 <td>Red Scooter</td>
+                 <td>Motorcycle</td>
+                 <td>132084</td>
               </tr>
            </table>
            <br />
            <div class="justify-content-between">
-               <h3 class="justify-center">Total Loan:${total}</h3>
-               <h3 class="justify-center">Total Usage:${total}</h3>
+               <h3 class="justify-center">Total Loan:5</h3>
+               <h3 class="justify-center">Total Usage:872KM</h3>
            </div>
         </div>
      </body>
