@@ -94,7 +94,8 @@ router.get(
         .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
         .where("loan.id_user", req.params.id)
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("loan")
         .count("id")
         .where("id_user", req.params.id)
@@ -153,6 +154,7 @@ router.get(
   "/pickup/:page",
   passport.authenticate("member", { session: false }),
   async (req, res) => {
+    let today = moment(moment()).format("YYYY-MM-DD");
     let currentPage = req.params.page;
     let perPage = 10;
     try {
@@ -168,6 +170,7 @@ router.get(
         .from("pickup")
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .where("pickup.ready", true)
+        .whereRaw(`pickup.start_at::text LIKE '%${today}%'`)
         .limit(perPage)
         .offset((currentPage - 1) * perPage)
         .orderBy("id", "desc");

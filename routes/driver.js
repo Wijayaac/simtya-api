@@ -27,7 +27,8 @@ router.get(
         .from("pickup")
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("pickup").count("id").first();
       res.status(200).json({
         success: true,
@@ -136,11 +137,15 @@ router.put(
         start_km: req.body.start_km,
         end_km: req.body.end_km,
       });
-
+      if (req.body.accidents)
+        bot.sendMessage(
+          chatId,
+          `Pickup schedule with route :${req.body.route} having an accident with detail : ${req.body.description}, pick up schedule will be late `
+        );
       if (req.body.ready)
         bot.sendMessage(
           chatId,
-          `Penjemputan with route :${req.body.route} Ready`
+          `Pickup schedule with route :${req.body.route} Ready`
         );
       res.status(200).json({
         success: true,
@@ -174,7 +179,8 @@ router.get(
         .from("services")
         .leftJoin("vehicles", "services.id_vehicle", "vehicles.id")
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("services").count("id").first();
       res.status(200).json({
         success: true,

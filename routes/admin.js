@@ -257,35 +257,6 @@ router.get(
 );
 
 router.get(
-  "/pickup",
-  passport.authenticate("admin", { session: false }),
-  async (req, res) => {
-    try {
-      data = await database
-        .select(
-          "id",
-          "start_at",
-          "end_at",
-          "route",
-          "description",
-          "id_vehicle",
-          "ready"
-        )
-        .from("pickup");
-      res
-        .status(200)
-        .json({ success: true, message: "Success processing data", data });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Oops you hit an error, try again later ya....",
-        error,
-      });
-    }
-  }
-);
-
-router.get(
   "/pickup/:id",
   passport.authenticate("admin", { session: false }),
   async (req, res) => {
@@ -435,7 +406,8 @@ router.get(
         .from("services")
         .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("services").count("id").first();
       res.status(200).json({
         success: true,
@@ -627,7 +599,8 @@ router.get(
         .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
         .innerJoin("users", "loan.id_user", "users.id")
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("loan").count("id").first();
       res.status(200).json({
         success: true,
@@ -732,7 +705,8 @@ router.get(
         .from("pickup")
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("pickup").count("id").first();
       res.status(200).json({
         success: true,
