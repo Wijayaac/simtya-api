@@ -2,6 +2,7 @@ const router = require("express").Router();
 const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
+const moment = require("moment");
 
 router.get("/chart/loan/:user", async (req, res) => {
   let data;
@@ -168,7 +169,8 @@ router.get(
         .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .where("pickup.ready", true)
         .limit(perPage)
-        .offset((currentPage - 1) * perPage);
+        .offset((currentPage - 1) * perPage)
+        .orderBy("id", "desc");
       let { count } = await database("pickup")
         .count("id")
         .where("ready", true)
