@@ -30,9 +30,19 @@ var pickupTemplate = fs.readFileSync(
   "utf-8"
 );
 
-// testing create and send pdf into client
+// testing create and send inventory pdf into client
 router.get("/inventory-pdf", async (req, res) => {
-  inventoryHTML();
+  let data = await database
+    .select("name", "type", "km", "now_km")
+    .from("vehicles");
+  let inventory = await data.map((item) => {
+    return `<tr class="item">
+              <td>${item.name}</td>
+              <td>${item.type}</td>
+              <td>${item.now_km - item.km} KM</td>
+            </tr>`;
+  });
+  await inventoryHTML(inventory);
   try {
     await pdf
       .create(inventoryTemplate, options)
@@ -47,7 +57,17 @@ router.get("/inventory-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/pickup-pdf", async (req, res) => {
-  pickupHTML();
+  let { rows } = await database.raw(
+    "SELECT COUNT(pickup.id_vehicle) as times ,vehicles.type,vehicles.name FROM pickup LEFT JOIN vehicles ON vehicles.id = pickup.id_vehicle GROUP BY vehicles.type ,vehicles.name"
+  );
+  let pickup = await rows.map((item) => {
+    return `<tr class="item">
+            <td>${item.name}</td>
+            <td>${item.type}</td>
+            <td>${item.times}</td>
+          </tr>`;
+  });
+  await pickupHTML(pickup);
   try {
     await pdf.create(pickupTemplate, options).toFile("pickup.pdf", (err) => {
       if (err)
@@ -60,7 +80,17 @@ router.get("/pickup-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/loan-pdf", async (req, res) => {
-  loanHTML();
+  let { rows } = await database.raw(
+    "SELECT COUNT(loan.id_vehicle) as times ,vehicles.type,vehicles.name FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle GROUP BY vehicles.type ,vehicles.name"
+  );
+  let loan = await rows.map((item) => {
+    return `<tr class="item">
+              <td>${item.name}</td>
+              <td>${item.type}</td>
+              <td>${item.times}</td>
+            </tr>`;
+  });
+  await loanHTML(loan);
   try {
     await pdf.create(loanTemplate, options).toFile("loan.pdf", (err) => {
       if (err)
@@ -73,7 +103,17 @@ router.get("/loan-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/service-pdf", async (req, res) => {
-  serviceHTML();
+  let { rows } = await database.raw(
+    "SELECT vehicles.name,vehicles.type,service_details.service_fee AS total FROM services  LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON services.id_vehicle = vehicles.id GROUP BY vehicles.name, vehicles.type,service_details.service_fee"
+  );
+  let loan = await rows.map((item) => {
+    return `<tr class="item">
+              <td>${item.name}</td>
+              <td>${item.type}</td>
+              <td>${item.total}</td>
+            </tr>`;
+  });
+  await serviceHTML(loan);
   try {
     await pdf.create(serviceTemplate, options).toFile("service.pdf", (err) => {
       if (err)
@@ -85,22 +125,132 @@ router.get("/service-pdf", async (req, res) => {
   }
 });
 
+router.get("/chart/inventory", async (req, res) => {
+  try {
+    const { rows } = await database.raw(
+      "SELECT COUNT(id),type from vehicles GROUP BY type"
+    );
+    data = {
+      rows,
+    };
+    res.status(200).json({
+      success: true,
+      message: "Success getting that data",
+      data,
+    });
+  } catch (error) {
+    data = {
+      error,
+    };
+    res.status(500).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      data,
+    });
+  }
+});
+router.get("/chart/pickup", async (req, res) => {
+  try {
+    const { rows } = await database.raw(
+      "SELECT COUNT(pickup.id_vehicle), vehicles.name FROM pickup LEFT JOIN vehicles ON vehicles.id = pickup.id_vehicle WHERE pickup.ready = true GROUP BY vehicles.name  "
+    );
+    data = {
+      rows,
+    };
+    res.status(200).json({
+      success: true,
+      message: "Success getting that data",
+      data,
+    });
+  } catch (error) {
+    data = {
+      error,
+    };
+    res.status(500).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      data,
+    });
+  }
+});
+
+router.get("/chart/loan", async (req, res) => {
+  let data;
+  try {
+    const { rows } = await database.raw(
+      "SELECT COUNT(loan.id_vehicle), vehicles.name FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle GROUP BY vehicles.name"
+    );
+    data = {
+      rows,
+    };
+    res.status(200).json({
+      success: true,
+      message: "Success getting that data",
+      data,
+    });
+  } catch (error) {
+    data = {
+      error,
+    };
+    res.status(500).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      data,
+    });
+  }
+});
+
+router.get("/chart/service", async (req, res) => {
+  let data;
+  try {
+    const { rows } = await database.raw(
+      "SELECT vehicles.name, SUM(service_details.service_fee) AS total FROM services LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON vehicles.id = services.id_vehicle GROUP BY vehicles.name"
+    );
+    data = {
+      rows,
+    };
+    res.status(200).json({
+      success: true,
+      message: "Success getting that data",
+      data,
+    });
+  } catch (error) {
+    data = {
+      error,
+    };
+    res.status(500).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      data,
+    });
+  }
+});
+
 router.get(
   "/",
   // passport.authenticate("admin", { session: false }),
   async (req, res) => {
+    let data;
     try {
-      let { rows } = await database.raw(
-        "SELECT COUNT(id),type from vehicles GROUP BY type"
-      );
-      res
-        .status(200)
-        .json({ success: true, message: "Success getting that data", rows });
+      let inventory = await database
+        .select("type", "name", "km", "now_km")
+        .from("vehicles");
+      data = {
+        inventory,
+      };
+      res.status(200).json({
+        success: true,
+        message: "Success getting that data",
+        data,
+      });
     } catch (error) {
-      res.status(401).json({
+      data = {
+        error,
+      };
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
-        error,
+        data,
       });
     }
   }
@@ -109,7 +259,7 @@ router.get(
 router.get(
   "/pickup",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -126,7 +276,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -138,7 +288,7 @@ router.get(
 router.get(
   "/pickup/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -155,7 +305,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -167,7 +317,7 @@ router.get(
 router.post(
   "/pickup",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("pickup").insert(
         {
@@ -185,7 +335,7 @@ router.post(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -197,7 +347,7 @@ router.post(
 router.put(
   "/pickup",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("pickup").where("id", req.body.id).update({
         id_vehicle: req.body.id_vehicle,
@@ -209,7 +359,7 @@ router.put(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -221,14 +371,14 @@ router.put(
 router.delete(
   "/pickup/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("pickup").where("id", req.params.id).del();
       res
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -240,7 +390,7 @@ router.delete(
 router.get(
   "/loan",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -258,7 +408,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -269,9 +419,9 @@ router.get(
 router.get(
   "/service/:page",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     let currentPage = req.params.page;
-    let perPage = 2;
+    let perPage = 10;
     try {
       let data = await database
         .select(
@@ -295,7 +445,7 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -306,14 +456,14 @@ router.get(
 router.get(
   "/inventory",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select("id", "name", "photo", "years", "brand", "type", "description")
         .from("vehicles");
       res.status(200).json(data);
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -324,7 +474,7 @@ router.get(
 router.get(
   "/inventory/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -344,7 +494,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -352,7 +502,7 @@ router.get(
     }
   }
 );
-router.get("/vehicle/:type", async (req, res, next) => {
+router.get("/vehicle/:type", async (req, res) => {
   try {
     const data = await database
       .select("id", "name", "type")
@@ -362,7 +512,7 @@ router.get("/vehicle/:type", async (req, res, next) => {
       .status(200)
       .json({ success: true, message: "Success processing data", data });
   } catch (error) {
-    res.status(401).json({
+    res.status(500).json({
       success: false,
       message: "Oops you hit an error, try again later ya....",
       error,
@@ -373,7 +523,7 @@ router.post(
   "/inventory",
   passport.authenticate("admin", { session: false }),
   upload.single("photo"),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       const { filename } = req.file;
       data = await database("vehicles").insert(
@@ -393,7 +543,7 @@ router.post(
         .status(200)
         .json({ success: true, message: "success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -405,7 +555,7 @@ router.put(
   "/inventory",
   passport.authenticate("admin", { session: false }),
   upload.single("photo"),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       var insertFilename = "";
       if (!req.file) {
@@ -428,7 +578,7 @@ router.put(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -439,14 +589,14 @@ router.put(
 router.delete(
   "/inventory/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database("vehicles").where("id", req.params.id).del();
       res
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -458,9 +608,9 @@ router.delete(
 router.get(
   "/loanlist/:page",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     let currentPage = req.params.page;
-    let perPage = 2;
+    let perPage = 10;
     try {
       let data = await database
         .select(
@@ -487,7 +637,7 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -498,7 +648,7 @@ router.get(
 router.get(
   "/loan/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -519,7 +669,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -530,7 +680,7 @@ router.get(
 router.get(
   "/loanhistory/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       history = await database
         .select(
@@ -554,7 +704,7 @@ router.get(
         .first();
       res.status(200).json({ history });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -566,9 +716,9 @@ router.get(
 router.get(
   "/pickuplist/:page",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     let currentPage = req.params.page;
-    let perPage = 1;
+    let perPage = 10;
     try {
       let data = await database
         .select(
@@ -592,7 +742,7 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -603,7 +753,7 @@ router.get(
 router.get(
   "/pickuplist/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -624,7 +774,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -635,7 +785,7 @@ router.get(
 router.get(
   "/pickuphistory/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       pickup = await database
         .select(
@@ -667,7 +817,7 @@ router.get(
         history,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -679,7 +829,7 @@ router.get(
 router.get(
   "/servicedetail/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       data = await database
         .select(
@@ -700,7 +850,7 @@ router.get(
         .status(200)
         .json({ success: true, message: "Success processing data", data });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,
@@ -711,7 +861,7 @@ router.get(
 router.get(
   "/servicehistory/:id",
   passport.authenticate("admin", { session: false }),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       history = await database
         .select(
@@ -733,7 +883,7 @@ router.get(
         .first();
       res.status(200).json({ history });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya....",
         error,

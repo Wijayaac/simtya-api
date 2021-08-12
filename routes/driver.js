@@ -1,7 +1,6 @@
 const router = require("express").Router();
 const passport = require("passport");
 const database = require("../config/database");
-const upload = require("../config/upload");
 const TelegramBot = require("node-telegram-bot-api");
 require("dotenv").config();
 
@@ -14,7 +13,7 @@ router.get(
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
     let currentPage = req.params.page;
-    let perPage = 1;
+    let perPage = 10;
     try {
       let data = await database
         .select(
@@ -38,7 +37,7 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -84,7 +83,7 @@ router.get(
         history,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -117,7 +116,7 @@ router.get(
         data,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -138,14 +137,18 @@ router.put(
         end_km: req.body.end_km,
       });
 
-      if (req.body.ready) bot.sendMessage(chatId, "Penjemputan Ready");
+      if (req.body.ready)
+        bot.sendMessage(
+          chatId,
+          `Penjemputan with route :${req.body.route} Ready`
+        );
       res.status(200).json({
         success: true,
         message: "success processing that data",
         data,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -158,7 +161,7 @@ router.get(
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
     let currentPage = req.params.page;
-    let perPage = 1;
+    let perPage = 10;
     try {
       let data = await database
         .select(
@@ -181,7 +184,7 @@ router.get(
         maxPage: Math.ceil(count / perPage),
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -201,7 +204,7 @@ router.post(
         `select exists(select 1 from services where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
       );
       if (!rows[0].exists && !exists.rows[0].exists) {
-        data = await database("services").insert(
+        let service = await database("services").insert(
           {
             id_vehicle: req.body.vehicle,
             start_at: req.body.start_at,
@@ -212,6 +215,10 @@ router.post(
           },
           "id"
         );
+        await database("service_details").insert({
+          id_service: service[0],
+        });
+        let data = `${req.body.vehicle} Scheduled for service`;
         res.status(200).json({
           success: true,
           message: "success processing that data",
@@ -220,7 +227,7 @@ router.post(
       }
       res.send(false);
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -236,24 +243,31 @@ router.get(
     try {
       data = await database
         .select(
-          "id",
-          "type",
-          "description",
-          "start_km",
-          "end_km",
-          "start_at",
-          "end_at",
-          "id_vehicle"
+          "service_details.service_fee",
+          "service_details.service_part",
+          "services.id",
+          "services.type",
+          "services.description",
+          "services.start_km",
+          "services.end_km",
+          "services.start_at",
+          "services.end_at",
+          "services.id_vehicle"
         )
         .from("services")
-        .where("id", req.params.id);
+        .leftJoin(
+          "service_details",
+          "services.id",
+          "service_details.id_service"
+        )
+        .where("services.id", req.params.id);
       res.status(200).json({
         success: true,
         message: "Success processing that data",
         data,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -274,7 +288,7 @@ router.delete(
         data,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,
@@ -288,25 +302,33 @@ router.put(
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
     try {
-      data = await database("services").where("id", req.body.id).update(
+      let serviceId = req.body.id;
+      let description = req.body.description;
+      await database("services").where("id", serviceId).update({
+        id_vehicle: req.body.vehicle,
+        start_km: req.body.start_km,
+        end_km: req.body.end_km,
+        start_at: req.body.start_at,
+        end_at: req.body.end_at,
+        type: req.body.type,
+        description: description,
+      });
+      await database("service_details").where("id_service", serviceId).update(
         {
-          id_vehicle: req.body.vehicle,
-          start_km: req.body.start_km,
-          end_km: req.body.end_km,
-          start_at: req.body.start_at,
-          end_at: req.body.end_at,
-          type: req.body.type,
-          description: req.body.description,
+          service_fee: req.body.fee,
+          service_part: req.body.part,
+          description: description,
         },
         "id"
       );
+      let data = `${req.body.vehicle} Updated`;
       res.status(200).json({
         success: true,
         message: "Success processing that data",
         data,
       });
     } catch (error) {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
         message: "Oops you hit an error, try again later ya...",
         error,

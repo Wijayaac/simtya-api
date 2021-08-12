@@ -1,4 +1,10 @@
+#production reports files
+*.pdf
+document.pdf
 
+#html boilerplate
+documents/
+*.html
 # Logs
 logs
 *.log

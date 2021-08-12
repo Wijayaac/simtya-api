@@ -1,8 +1,7 @@
 var fs = require("fs");
 var path = require("path");
-
 // styles file
-const styles = `  <style>
+const styles = `<style>
 .justify-content-between{
    display: flex;
    justify-content: space-between;
@@ -51,7 +50,7 @@ line-height: 45px;
 color: #333;
 }
 .invoice-box table tr.information table td {
-padding-bottom: 40px;
+padding-bottom: 20px;
 }
 .invoice-box table tr.heading td {
 background: #eee;
@@ -85,75 +84,60 @@ text-align: center;
 }
 </style>`;
 // Structures of dinaminc files
-const buildInventoryHTML = () => {
+const buildInventoryHTML = (data) => {
   const today = new Date();
-  let type,
-    kilometer,
-    total = 1000;
   return `  <!doctype html>
-  <html>
-     <head>
-        <meta charset="utf-8">
-        <title>Inventory Report</title>
-        ${styles}
-     </head>
-     <body>
-        <div class="invoice-box ">
-           <h1 class='justify-center more-space'>Inventory Reports</h1>
-           <table cellpadding="0" cellspacing="0">
-              <tr class="top">
-                 <td colspan="2">
-                    <table>
-                       <tr>
-                          <td class="title"><svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">
+   <html>
+      <head>
+         <meta charset="utf-8">
+         <title>Inventory Report</title>
+         ${styles}
+      </head>
+      <body>
+         <div class="invoice-box ">
+            <h1 class='justify-center more-space'>Inventory Reports</h1>
+            <table cellpadding="0" cellspacing="0">
+               <tr class="top">
+                  <td colspan="2">
+                     <table>
+                        <tr>
+                           <td class="title"><svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-truck" viewBox="0 0 16 16">
                            <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5v-7zm1.294 7.456A1.999 1.999 0 0 1 4.732 11h5.536a2.01 2.01 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456zM12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12v4zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
-                         </svg></td>
-                          <td>
-                             Date: ${today}
-                          </td>
-                       </tr>
-                    </table>
-                 </td>
-              </tr>
-              <tr class="information">
-                 <td colspan="2">
-                    <table>
-                       <tr>
-                          <td>
-                             Report Name: Inventory 
-                          </td>
-                       </tr>
-                    </table>
-                 </td>
-              </tr>
-              <tr class="heading">
-                 <td>Vehicles:</td>
-                 <td>Types :</td>
-                 <td>Details :</td>
-              </tr>
-              <tr class="item">
-                 <td>First item:</td>
-                 <td>Car</td>
-                 <td>128937</td>
-              </tr>
-              <tr class="item">
-                 <td>Second item:</td>
-                 <td>Motorcycle</td>
-                 <td>256398</td>
-              </tr>
-           </table>
-           <br />
-           <h3 class="justify-center">Total Inventory:2</h3>
-        </div>
-     </body>
-  </html>
+                        </svg></td>
+                           <td>
+                              Date: ${today}
+                           </td>
+                        </tr>
+                     </table>
+                  </td>
+               </tr>
+               <tr class="information">
+                  <td colspan="2">
+                     <table>
+                        <tr>
+                           <td>
+                              Report Name: Inventory 
+                           </td>
+                        </tr>
+                     </table>
+                  </td>
+               </tr>
+               <tr class="heading">
+                  <td>Vehicles:</td>
+                  <td>Types:</td>
+                  <td>Usage:</td>
+               </tr>
+               ${data}
+            </table>
+            <br />
+            <h2 class="justify-center">Total Inventory :${data.length}</h4>
+         </div>
+      </body>
+   </html>
 `;
 };
-const buildPickupHTML = () => {
+const buildPickupHTML = (data) => {
   const today = new Date();
-  let type = 1000;
-  let kilometer = 200;
-  let total = 200;
   return `
   <!doctype html>
   <html>
@@ -194,34 +178,21 @@ const buildPickupHTML = () => {
               </tr>
               <tr class="heading">
                  <td>Vehicles:</td>
-                 <td>Types :</td>
-                 <td>Times :</td>
+                 <td>Types:</td>
+                 <td>Times:</td>
               </tr>
-              <tr class="item">
-                 <td>Kia Travello Baru</td>
-                 <td>Car</td>
-                 <td>5</td>
-              </tr>
-              <tr class="item">
-                 <td>Kia Pregio</td>
-                 <td>Car</td>
-                 <td>4</td>
-              </tr>
+              ${data}
            </table>
            <br />
            <div class="justify-content-between">
-               <h3 class="justify-center">Total Pickup:9</h3>
-               <h3 class="justify-center">Total Usage:213761</h3>
+               <h3 class="justify-center">Total Vehicle: ${data.length}</h3>
            </div>
         </div>
      </body>
   </html>`;
 };
-const buildServiceHTML = () => {
+const buildServiceHTML = (data) => {
   const today = new Date();
-  let type = 1000;
-  let cost = 1000;
-  let total = 1000;
   return `<!doctype html>
    <html>
       <head>
@@ -264,31 +235,18 @@ const buildServiceHTML = () => {
                   <td>Types :</td>
                   <td>Cost :</td>
                </tr>
-               <tr class="item">
-                  <td>Red Scooter</td>
-                  <td>Motorcycle</td>
-                  <td>200000</td>
-               </tr>
-               <tr class="item">
-                  <td>White Scooter</td>
-                  <td>Motorcycle</td>
-                  <td>300000</td>
-               </tr>
+               ${data}
             </table>
             <br />
             <div class="justify-content-between">
-                <h3 class="justify-center">Total Service:2</h3>
-                <h3 class="justify-center">Costs:500000</h3>
+                <h3 class="justify-center">Total Vehicles:${data.length}</h3>
             </div>
          </div>
       </body>
    </html>`;
 };
-const buildLoanHTML = () => {
+const buildLoanHTML = (data) => {
   const today = new Date();
-  let type = 1000;
-  let kilometer = 1000;
-  let total = 1000;
   return `
    <!doctype html>
   <html>
@@ -328,24 +286,14 @@ const buildLoanHTML = () => {
               </tr>
               <tr class="heading">
                  <td>Vehicles:</td>
-                 <td>Types :</td>
-                 <td>Usage :</td>
+                 <td>Types:</td>
+                 <td>Times:</td>
               </tr>
-              <tr class="item">
-                 <td>White Scooter</td>
-                 <td>Motorcycle</td>
-                 <td>2137521</td>
-              </tr>
-              <tr class="item">
-                 <td>Red Scooter</td>
-                 <td>Motorcycle</td>
-                 <td>132084</td>
-              </tr>
+              ${data}
            </table>
            <br />
            <div class="justify-content-between">
-               <h3 class="justify-center">Total Loan:5</h3>
-               <h3 class="justify-center">Total Usage:872KM</h3>
+               <h3 class="justify-center">Total Vehicle: ${data.length} </h3>
            </div>
         </div>
      </body>
@@ -354,35 +302,35 @@ const buildLoanHTML = () => {
 };
 
 // Create dinamic files
-const inventoryHTML = () => {
+const inventoryHTML = (data) => {
   let filename = path.join(__dirname, "inventory.html");
   var stream = fs.createWriteStream(filename);
   stream.once("open", function () {
-    var html = buildInventoryHTML();
+    var html = buildInventoryHTML(data);
     stream.end(html);
   });
 };
-const pickupHTML = () => {
+const pickupHTML = (data) => {
   let filename = path.join(__dirname, "pickup.html");
   var stream = fs.createWriteStream(filename);
   stream.once("open", function () {
-    var html = buildPickupHTML();
+    var html = buildPickupHTML(data);
     stream.end(html);
   });
 };
-const serviceHTML = () => {
+const serviceHTML = (data) => {
   let filename = path.join(__dirname, "service.html");
   var stream = fs.createWriteStream(filename);
   stream.once("open", function () {
-    var html = buildServiceHTML();
+    var html = buildServiceHTML(data);
     stream.end(html);
   });
 };
-const loanHTML = () => {
+const loanHTML = (data) => {
   let filename = path.join(__dirname, "loan.html");
   var stream = fs.createWriteStream(filename);
   stream.once("open", function () {
-    var html = buildLoanHTML();
+    var html = buildLoanHTML(data);
     stream.end(html);
   });
 };
