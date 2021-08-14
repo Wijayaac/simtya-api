@@ -3,6 +3,11 @@ const passport = require("passport");
 const database = require("../config/database");
 const upload = require("../config/upload");
 const moment = require("moment");
+const TelegramBot = require("node-telegram-bot-api");
+
+const token = process.env.TELEGRAM_TOKEN;
+const adminId = process.env.TELEGRAM_ADMIN;
+const bot = new TelegramBot(token, { polling: false });
 
 router.get("/chart/loan/:user", async (req, res) => {
   let data;
@@ -273,6 +278,11 @@ router.put(
         end_km: req.body.end_km,
         description: req.body.description,
       });
+      if (req.body.accidents)
+        bot.sendMessage(
+          adminId,
+          `Loan motorcycle with purpose :${req.body.purpose} having an accident with detail : ${req.body.description}`
+        );
       res.status(200).json({
         success: true,
         message: "Success processing that data",
