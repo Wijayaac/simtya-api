@@ -458,7 +458,9 @@ router.get(
           "type",
           "now_km",
           "km",
-          "description"
+          "description",
+          "created_at",
+          "updated_at"
         )
         .from("vehicles")
         .where("id", req.params.id);
