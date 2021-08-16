@@ -252,7 +252,7 @@ router.post(
           data,
         });
       }
-      res.status(403).send(false);
+      res.send(false);
     } catch (error) {
       res.status(500).json({
         success: false,
