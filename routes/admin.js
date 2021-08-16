@@ -5,6 +5,7 @@ const upload = require("../config/upload");
 const pdf = require("html-pdf");
 const fs = require("fs");
 const path = require("path");
+const moment = require("moment");
 
 // init the html builder
 const inventoryHTML = require("../documents").inventoryHTML;
@@ -57,8 +58,10 @@ router.get("/inventory-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/pickup-pdf", async (req, res) => {
+  let today = moment(moment()).format("YYYY-MM");
+
   let { rows } = await database.raw(
-    "SELECT COUNT(pickup.id_vehicle) as times ,vehicles.type,vehicles.name FROM pickup LEFT JOIN vehicles ON vehicles.id = pickup.id_vehicle GROUP BY vehicles.type ,vehicles.name"
+    `SELECT COUNT(pickup.id_vehicle) as times ,vehicles.type,vehicles.name FROM pickup LEFT JOIN vehicles ON vehicles.id = pickup.id_vehicle WHERE pickup.start_at::text LIKE '%${today}%' GROUP BY vehicles.type ,vehicles.name`
   );
   let pickup = await rows.map((item) => {
     return `<tr class="item">
@@ -80,8 +83,9 @@ router.get("/pickup-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/loan-pdf", async (req, res) => {
+  let today = moment(moment()).format("YYYY-MM");
   let { rows } = await database.raw(
-    "SELECT COUNT(loan.id_vehicle) as times ,vehicles.type,vehicles.name FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle GROUP BY vehicles.type ,vehicles.name"
+    `SELECT COUNT(loan.id_vehicle) as times ,vehicles.type,vehicles.name FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle WHERE loan.start_at::text LIKE '%${today}%' GROUP BY vehicles.type ,vehicles.name`
   );
   let loan = await rows.map((item) => {
     return `<tr class="item">
@@ -103,8 +107,9 @@ router.get("/loan-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/service-pdf", async (req, res) => {
+  let today = moment(moment()).format("YYYY-MM");
   let { rows } = await database.raw(
-    "SELECT vehicles.name,vehicles.type,service_details.service_fee AS total FROM services  LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON services.id_vehicle = vehicles.id GROUP BY vehicles.name, vehicles.type,service_details.service_fee"
+    `SELECT vehicles.name,vehicles.type,service_details.service_fee AS total FROM services  LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON services.id_vehicle = vehicles.id WHERE services.start_at::text LIKE '%${today}%' GROUP BY vehicles.name, vehicles.type,service_details.service_fee`
   );
   let loan = await rows.map((item) => {
     return `<tr class="item">
