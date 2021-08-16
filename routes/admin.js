@@ -14,25 +14,12 @@ const serviceHTML = require("../documents").serviceHTML;
 const loanHTML = require("../documents").loanHTML;
 var options = { format: "Letter" };
 
-var inventoryTemplate = fs.readFileSync(
-  `${path.join(__dirname, "..", "documents", "inventory.html")}`,
-  "utf-8"
-);
-var serviceTemplate = fs.readFileSync(
-  `${path.join(__dirname, "..", "documents", "service.html")}`,
-  "utf-8"
-);
-var loanTemplate = fs.readFileSync(
-  `${path.join(__dirname, "..", "documents", "loan.html")}`,
-  "utf-8"
-);
-var pickupTemplate = fs.readFileSync(
-  `${path.join(__dirname, "..", "documents", "pickup.html")}`,
-  "utf-8"
-);
-
 // testing create and send inventory pdf into client
 router.get("/inventory-pdf", async (req, res) => {
+  let inventoryTemplate = await fs.readFileSync(
+    `${path.join(__dirname, "..", "documents", "inventory.html")}`,
+    "utf-8"
+  );
   let data = await database
     .select("name", "type", "km", "now_km")
     .from("vehicles");
@@ -58,6 +45,10 @@ router.get("/inventory-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/pickup-pdf", async (req, res) => {
+  let pickupTemplate = fs.readFileSync(
+    `${path.join(__dirname, "..", "documents", "pickup.html")}`,
+    "utf-8"
+  );
   let today = moment(moment()).format("YYYY-MM");
 
   let { rows } = await database.raw(
@@ -83,6 +74,10 @@ router.get("/pickup-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/loan-pdf", async (req, res) => {
+  let loanTemplate = fs.readFileSync(
+    `${path.join(__dirname, "..", "documents", "loan.html")}`,
+    "utf-8"
+  );
   let today = moment(moment()).format("YYYY-MM");
   let { rows } = await database.raw(
     `SELECT COUNT(loan.id_vehicle) as times ,vehicles.type,vehicles.name FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle WHERE loan.start_at::text LIKE '%${today}%' GROUP BY vehicles.type ,vehicles.name`
@@ -107,6 +102,10 @@ router.get("/loan-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/service-pdf", async (req, res) => {
+  let serviceTemplate = fs.readFileSync(
+    `${path.join(__dirname, "..", "documents", "service.html")}`,
+    "utf-8"
+  );
   let today = moment(moment()).format("YYYY-MM");
   let { rows } = await database.raw(
     `SELECT vehicles.name,vehicles.type,service_details.service_fee AS total FROM services  LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON services.id_vehicle = vehicles.id WHERE services.start_at::text LIKE '%${today}%' GROUP BY vehicles.name, vehicles.type,service_details.service_fee`
