@@ -45,7 +45,7 @@ router.get("/inventory-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/pickup-pdf", async (req, res) => {
-  let pickupTemplate = fs.readFileSync(
+  let pickupTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "pickup.html")}`,
     "utf-8"
   );
@@ -74,7 +74,7 @@ router.get("/pickup-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/loan-pdf", async (req, res) => {
-  let loanTemplate = fs.readFileSync(
+  let loanTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "loan.html")}`,
     "utf-8"
   );
@@ -102,7 +102,7 @@ router.get("/loan-pdf", async (req, res) => {
 });
 // testing create and send pdf into client
 router.get("/service-pdf", async (req, res) => {
-  let serviceTemplate = fs.readFileSync(
+  let serviceTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "service.html")}`,
     "utf-8"
   );
