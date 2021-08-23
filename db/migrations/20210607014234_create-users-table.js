@@ -35,7 +35,7 @@ exports.up = function (knex, Promise) {
       table.date("end_at");
       table.string("type");
       table.text("description");
-      table.boolean("read");
+      table.boolean("finish");
       table.timestamps(true, true);
     })
     .createTable("service_details", (table) => {
@@ -57,7 +57,7 @@ exports.up = function (knex, Promise) {
       table.date("end_at");
       table.boolean("accidents");
       table.text("description");
-      table.boolean("read");
+      table.boolean("finish");
       table.timestamps(true, true);
     })
     .createTable("loan_details", (table) => {

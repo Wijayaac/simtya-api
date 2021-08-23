@@ -283,6 +283,11 @@ router.put(
           adminId,
           `Loan motorcycle with purpose :${req.body.purpose} having an accident with detail : ${req.body.description}`
         );
+      if (req.body.finish)
+        bot.sendMessage(
+          adminId,
+          `Loan motorcycle with purpose :${req.body.purpose} finish loan please confirm`
+        );
       res.status(200).json({
         success: true,
         message: "Success processing that data",

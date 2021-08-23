@@ -15,18 +15,20 @@ const loanHTML = require("../documents").loanHTML;
 var options = { format: "Letter" };
 
 // testing create and send inventory pdf into client
-router.get("/inventory-pdf", async (req, res) => {
-  let inventoryTemplate = await fs.readFileSync(
+router.get("/inventory-pdf/:month", async (req, res) => {
+  const month = req.params.month;
+  const inventoryTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "inventory.html")}`,
     "utf-8"
   );
-  let data = await database
-    .select("name", "type", "km", "now_km")
-    .from("vehicles");
-  let inventory = await data.map((item) => {
+  const { rows } = await database.raw(
+    `SELECT vehicles.name,vehicles.now_km,vehicles.km, COUNT(services.id)::int AS service, COUNT(loan.id)::int AS loan, COUNT(pickup.id)::int AS pickup FROM vehicles LEFT JOIN services ON services.id_vehicle = vehicles.id LEFT JOIN loan ON loan.id_vehicle = vehicles.id LEFT JOIN pickup ON pickup.id_vehicle = vehicles.id WHERE vehicles.created_at::text like '%${month}%' GROUP BY vehicles.id;`
+  );
+  const inventory = await rows.map((item) => {
     return `<tr class="item">
               <td>${item.name}</td>
-              <td>${item.type}</td>
+              <td>${item.service}</td>
+              <td>${item.loan + item.pickup}</td>
               <td>${item.now_km - item.km} KM</td>
             </tr>`;
   });
@@ -44,21 +46,23 @@ router.get("/inventory-pdf", async (req, res) => {
   }
 });
 // testing create and send pdf into client
-router.get("/pickup-pdf", async (req, res) => {
+router.get("/pickup-pdf/:month", async (req, res) => {
   let pickupTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "pickup.html")}`,
     "utf-8"
   );
-  let today = moment(moment()).format("YYYY-MM");
+  let month = req.params.month;
 
   let { rows } = await database.raw(
-    `SELECT COUNT(pickup.id_vehicle) as times ,vehicles.type,vehicles.name FROM pickup LEFT JOIN vehicles ON vehicles.id = pickup.id_vehicle WHERE pickup.start_at::text LIKE '%${today}%' GROUP BY vehicles.type ,vehicles.name`
+    `SELECT vehicles.name,pickup.start_at, pickup.route, pickup.description,pickup.start_km, pickup.end_km FROM pickup LEFT JOIN vehicles ON vehicles.id = pickup.id_vehicle WHERE pickup.created_at::text LIKE '%${month}%' `
   );
   let pickup = await rows.map((item) => {
     return `<tr class="item">
             <td>${item.name}</td>
-            <td>${item.type}</td>
-            <td>${item.times}</td>
+            <td>${item.route}</td>
+            <td>${moment(item.start_at).format("D/MMM, HH:mm")}</td>
+            <td>${item.end_km - item.start_km} KM</td>
+            <td>${item.description}</td>
           </tr>`;
   });
   await pickupHTML(pickup);
@@ -73,20 +77,21 @@ router.get("/pickup-pdf", async (req, res) => {
   }
 });
 // testing create and send pdf into client
-router.get("/loan-pdf", async (req, res) => {
-  let loanTemplate = await fs.readFileSync(
+router.get("/loan-pdf/:month", async (req, res) => {
+  const loanTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "loan.html")}`,
     "utf-8"
   );
-  let today = moment(moment()).format("YYYY-MM");
-  let { rows } = await database.raw(
-    `SELECT COUNT(loan.id_vehicle) as times ,vehicles.type,vehicles.name FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle WHERE loan.start_at::text LIKE '%${today}%' GROUP BY vehicles.type ,vehicles.name`
+  const month = req.params.month;
+  const { rows } = await database.raw(
+    `SELECT vehicles.name, loan.description AS problem, loan.start_at AS date, users.name AS borrower FROM loan LEFT JOIN vehicles ON vehicles.id = loan.id_vehicle LEFT JOIN users ON users.id = loan.id_user WHERE loan.start_at::text LIKE '%${month}%'`
   );
   let loan = await rows.map((item) => {
     return `<tr class="item">
               <td>${item.name}</td>
-              <td>${item.type}</td>
-              <td>${item.times}</td>
+              <td>${moment(item.date).format("D-MMM-YY")}</td>
+              <td>${!item.problem ? "nothing" : item.problem}</td>
+              <td>${item.borrower}</td>
             </tr>`;
   });
   await loanHTML(loan);
@@ -101,23 +106,25 @@ router.get("/loan-pdf", async (req, res) => {
   }
 });
 // testing create and send pdf into client
-router.get("/service-pdf", async (req, res) => {
+router.get("/service-pdf/:month", async (req, res) => {
   let serviceTemplate = await fs.readFileSync(
     `${path.join(__dirname, "..", "documents", "service.html")}`,
     "utf-8"
   );
-  let today = moment(moment()).format("YYYY-MM");
+  let month = req.params.month;
   let { rows } = await database.raw(
-    `SELECT vehicles.name,vehicles.type,service_details.service_fee AS total FROM services  LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON services.id_vehicle = vehicles.id WHERE services.start_at::text LIKE '%${today}%' GROUP BY vehicles.name, vehicles.type,service_details.service_fee`
+    `SELECT vehicles.name, service_details.service_part AS part,service_details.service_fee AS cost, services.start_at AS date, services.type FROM services  LEFT JOIN service_details ON service_details.id_service = services.id LEFT JOIN vehicles ON services.id_vehicle = vehicles.id WHERE services.start_at::text LIKE '%${month}%' `
   );
-  let loan = await rows.map((item) => {
+  let service = await rows.map((item) => {
     return `<tr class="item">
               <td>${item.name}</td>
               <td>${item.type}</td>
-              <td>${item.total}</td>
+              <td>${moment(item.date).format("D-MM-YY")}</td>
+              <td>${item.part}</td>
+              <td>${item.cost}</td>
             </tr>`;
   });
-  await serviceHTML(loan);
+  await serviceHTML(service);
   try {
     await pdf.create(serviceTemplate, options).toFile("service.pdf", (err) => {
       if (err)
@@ -594,6 +601,7 @@ router.get(
         .select(
           "loan.id",
           "loan.accidents",
+          "loan.finish",
           "loan.purpose",
           "users.email",
           "users.username",
@@ -602,8 +610,8 @@ router.get(
           "vehicles.name"
         )
         .from("loan")
-        .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
-        .innerJoin("users", "loan.id_user", "users.id")
+        .leftJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .leftJoin("users", "loan.id_user", "users.id")
         .limit(perPage)
         .offset((currentPage - 1) * perPage)
         .orderBy("id", "desc");
@@ -624,6 +632,22 @@ router.get(
     }
   }
 );
+
+router.put("/loan/confirm/:id", async (req, res) => {
+  try {
+    await database("loan").where("id", req.params.id).update({
+      finish: true,
+    });
+    res.status(200).json({ success: true, message: "Success processing data" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      error,
+    });
+  }
+});
+
 router.get(
   "/loan/:id",
   passport.authenticate("admin", { session: false }),
@@ -641,8 +665,8 @@ router.get(
           "vehicles.name"
         )
         .from("loan")
-        .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
-        .innerJoin("users", "loan.id_user", "users.id")
+        .leftJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .leftJoin("users", "loan.id_user", "users.id")
         .where("loan.id", req.params.id);
       res
         .status(200)
@@ -747,7 +771,7 @@ router.get(
           "vehicles.name"
         )
         .from("pickup")
-        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .leftJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .where("pickup.id", req.params.id);
 
       res
@@ -779,7 +803,7 @@ router.get(
           "vehicles.name"
         )
         .from("pickup")
-        .innerJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
+        .leftJoin("vehicles", "pickup.id_vehicle", "vehicles.id")
         .where("pickup.id", req.params.id);
       history = await database
         .select(
@@ -823,8 +847,8 @@ router.get(
           "vehicles.name"
         )
         .from("services")
-        .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
-        .innerJoin("users", "services.id_user", "users.id")
+        .leftJoin("vehicles", "services.id_vehicle", "vehicles.id")
+        .leftJoin("users", "services.id_user", "users.id")
         .where("services.id", req.params.id);
       res
         .status(200)

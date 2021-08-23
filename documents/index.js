@@ -1,6 +1,8 @@
 var fs = require("fs");
 var path = require("path");
+const moment = require("moment");
 // styles file
+var today = moment().format("D-MMM-YYYY");
 const styles = `<style>
 .justify-content-between{
    display: flex;
@@ -85,7 +87,6 @@ text-align: center;
 </style>`;
 // Structures of dinaminc files
 const buildInventoryHTML = (data) => {
-  const today = new Date();
   return `  <!doctype html>
    <html>
       <head>
@@ -124,8 +125,9 @@ const buildInventoryHTML = (data) => {
                </tr>
                <tr class="heading">
                   <td>Vehicles:</td>
-                  <td>Types:</td>
-                  <td>Usage:</td>
+                  <td>Services:</td>
+                  <td>Usage(times):</td>
+                  <td>Usage(km):</td>
                </tr>
                ${data}
             </table>
@@ -137,7 +139,6 @@ const buildInventoryHTML = (data) => {
 `;
 };
 const buildPickupHTML = (data) => {
-  const today = new Date();
   return `
   <!doctype html>
   <html>
@@ -178,8 +179,10 @@ const buildPickupHTML = (data) => {
               </tr>
               <tr class="heading">
                  <td>Vehicles:</td>
-                 <td>Types:</td>
-                 <td>Times:</td>
+                 <td>Route:</td>
+                 <td>Schedule:</td>
+                 <td>Distance:</td>
+                 <td>Accidents:</td>
               </tr>
               ${data}
            </table>
@@ -192,7 +195,6 @@ const buildPickupHTML = (data) => {
   </html>`;
 };
 const buildServiceHTML = (data) => {
-  const today = new Date();
   return `<!doctype html>
    <html>
       <head>
@@ -231,8 +233,10 @@ const buildServiceHTML = (data) => {
                   </td>
                </tr>
                <tr class="heading">
-                  <td>Vehicles:</td>
-                  <td>Types :</td>
+                  <td>Vehicle:</td>
+                  <td>Type:</td>
+                  <td>Date:</td>
+                  <td>Part :</td>
                   <td>Cost :</td>
                </tr>
                ${data}
@@ -246,7 +250,6 @@ const buildServiceHTML = (data) => {
    </html>`;
 };
 const buildLoanHTML = (data) => {
-  const today = new Date();
   return `
    <!doctype html>
   <html>
@@ -286,8 +289,9 @@ const buildLoanHTML = (data) => {
               </tr>
               <tr class="heading">
                  <td>Vehicles:</td>
-                 <td>Types:</td>
-                 <td>Times:</td>
+                 <td>Date:</td>
+                 <td>Problem:</td>
+                 <td>Borrowe:</td>
               </tr>
               ${data}
            </table>

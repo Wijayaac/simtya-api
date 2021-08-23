@@ -217,7 +217,6 @@ router.post(
             end_at: req.body.end_at,
             type: req.body.type,
             id_user: 2,
-            description: req.body.description,
           },
           "id"
         );
