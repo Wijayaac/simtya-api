@@ -591,7 +591,7 @@ router.delete(
 );
 
 router.get(
-  "/loanlist/:page",
+  "/loan-list/:page",
   passport.authenticate("admin", { session: false }),
   async (req, res) => {
     let currentPage = req.params.page;
@@ -607,7 +607,8 @@ router.get(
           "users.username",
           "loan.start_at",
           "loan.end_at",
-          "vehicles.name"
+          "vehicles.name",
+          "loan.id_vehicle"
         )
         .from("loan")
         .leftJoin("vehicles", "loan.id_vehicle", "vehicles.id")
@@ -634,11 +635,29 @@ router.get(
 );
 
 router.put("/loan/confirm/:id", async (req, res) => {
+  const start = moment().format("YYYY-MM-DD");
+  const finish = req.body.finish;
   try {
-    await database("loan").where("id", req.params.id).update({
-      finish: true,
-    });
-    res.status(200).json({ success: true, message: "Success processing data" });
+    if (finish) {
+      await database("loan").where("id", req.params.id).update({
+        finish: req.body.finish,
+      });
+    } else {
+      await database("loan").where("id", req.params.id).update({
+        finish: !req.body.finish,
+        description: req.body.description,
+      });
+      await database("services").insert({
+        id_vehicle: req.body.vehicle,
+        start_at: start,
+        end_at: start,
+        type: "Check Service",
+        id_user: 1,
+      });
+    }
+    res
+      .status(200)
+      .json({ success: true, message: "Thanks for the confirmation" });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -681,7 +700,7 @@ router.get(
   }
 );
 router.get(
-  "/loanhistory/:id",
+  "/loan-history/:id",
   passport.authenticate("admin", { session: false }),
   async (req, res) => {
     try {
