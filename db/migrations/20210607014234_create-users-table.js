@@ -23,6 +23,7 @@ exports.up = function (knex, Promise) {
       table.integer("now_km", 8);
       table.string("photo");
       table.text("description");
+      table.boolean("ready");
       table.timestamps(true, true);
     })
     .createTable("services", (table) => {
@@ -58,6 +59,7 @@ exports.up = function (knex, Promise) {
       table.boolean("accidents");
       table.text("description");
       table.boolean("finish");
+      table.boolean("ready");
       table.timestamps(true, true);
     })
     .createTable("loan_details", (table) => {
