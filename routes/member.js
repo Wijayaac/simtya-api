@@ -308,17 +308,24 @@ router.put(
           adminId,
           `Loan motorcycle with purpose :${req.body.purpose} finish loan please confirm`
         );
-      if (serviceRoutine || accident)
-        await database("services").insert({
-          id_vehicle: req.body.vehicle,
-          start_at: start,
-          end_at: start,
-          type: `${serviceRoutine ? "Service Routine," : ""}  ${
-            accident ? "Incident Service" : ""
-          }`,
-          id_user: 2,
-          description: description,
+      if (serviceRoutine || accident) {
+        let service = await database("services").insert(
+          {
+            id_vehicle: req.body.vehicle,
+            start_at: start,
+            end_at: start,
+            type: `${serviceRoutine ? "Service Routine," : ""}  ${
+              accident ? "Incident Service" : ""
+            }`,
+            id_user: 2,
+            description: description,
+          },
+          "id"
+        );
+        await database("service_details").insert({
+          id_service: service[0],
         });
+      }
       res.status(200).json({
         success: true,
         message: "Success processing that data",

@@ -2,6 +2,7 @@ const router = require("express").Router();
 const passport = require("passport");
 const database = require("../config/database");
 const TelegramBot = require("node-telegram-bot-api");
+const moment = require("moment");
 require("dotenv").config();
 
 const token = process.env.TELEGRAM_TOKEN;
@@ -202,6 +203,9 @@ router.post(
   "/service",
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
+    const idVehicle = req.body.vehicle;
+    const startService = req.body.start_at;
+    const endService = req.body.end_at;
     try {
       let { rows } = await database.raw(
         `select exists(select 1 from loan where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
@@ -212,9 +216,9 @@ router.post(
       if (!rows[0].exists && !exists.rows[0].exists) {
         let service = await database("services").insert(
           {
-            id_vehicle: req.body.vehicle,
-            start_at: req.body.start_at,
-            end_at: req.body.end_at,
+            id_vehicle: idVehicle,
+            start_at: startService,
+            end_at: endService,
             type: req.body.type,
             id_user: 2,
           },
@@ -223,7 +227,16 @@ router.post(
         await database("service_details").insert({
           id_service: service[0],
         });
-        let data = `${req.body.vehicle} Scheduled for service`;
+        await database("vehicles").where("id", idVehicle).update({
+          ready: false,
+        });
+        await database("loan")
+          .where("id_vehicle", idVehicle)
+          .whereBetween("start_at", [startService, endService])
+          .update({
+            ready: false,
+          });
+        let data = `${idVehicle} Scheduled for service`;
         res.status(200).json({
           success: true,
           message: "success processing that data",
@@ -302,31 +315,60 @@ router.delete(
   }
 );
 
+router.get("/testing-between", async (req, res) => {
+  const endOfMonth = moment().endOf("month").format("YYYY-MM-DD");
+  try {
+    let data = await database("loan")
+      .where("id_vehicle", 11)
+      .whereBetween("start_at", ["2021-08-18", endOfMonth])
+      .update({
+        ready: true,
+      });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
 router.put(
   "/service",
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
+    const idVehicle = req.body.vehicle;
+    const serviceId = req.body.id;
+    const description = req.body.description;
+    const endService = moment(req.body.end_at).format("YYYY-MM-DD");
+    const endOfMonth = moment().endOf("month").format("YYYY-MM-DD");
     try {
-      let serviceId = req.body.id;
-      let description = req.body.description;
       await database("services").where("id", serviceId).update({
-        id_vehicle: req.body.vehicle,
+        id_vehicle: idVehicle,
         start_km: req.body.start_km,
         end_km: req.body.end_km,
         start_at: req.body.start_at,
-        end_at: req.body.end_at,
+        end_at: endService,
         type: req.body.type,
         description: description,
+        finish: req.body.finish,
       });
-      await database("service_details").where("id_service", serviceId).update(
-        {
-          service_fee: req.body.fee,
-          service_part: req.body.part,
-          description: description,
-        },
-        "id"
-      );
-      let data = `${req.body.vehicle} Updated`;
+      if (req.body.finish) {
+        await database("service_details")
+          .where("id_service", serviceId)
+          .update({
+            service_fee: req.body.fee,
+            service_part: req.body.part,
+            description: description,
+          });
+        await database("vehicles").where("id", idVehicle).update({
+          ready: true,
+        });
+        await database("loan")
+          .where("id_vehicle", idVehicle)
+          .whereBetween("start_at", [endService, endOfMonth])
+          .update({
+            ready: true,
+          });
+      }
+      let data = `${idVehicle} Updated`;
       res.status(200).json({
         success: true,
         message: "Success processing that data",

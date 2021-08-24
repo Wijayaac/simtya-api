@@ -665,12 +665,18 @@ router.put("/loan/confirm/:id", async (req, res) => {
         finish: !req.body.finish,
         description: req.body.description,
       });
-      await database("services").insert({
-        id_vehicle: req.body.vehicle,
-        start_at: start,
-        end_at: start,
-        type: "Check Service",
-        id_user: 1,
+      let service = await database("services").insert(
+        {
+          id_vehicle: req.body.vehicle,
+          start_at: start,
+          end_at: start,
+          type: "Check Service",
+          id_user: 1,
+        },
+        "id"
+      );
+      await database("service_details").insert({
+        id_service: service[0],
       });
       await database("vehicles").where("id", req.body.vehicle).update({
         ready: false,
