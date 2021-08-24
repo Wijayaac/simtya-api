@@ -204,14 +204,14 @@ router.post(
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
     const idVehicle = req.body.vehicle;
-    const startService = req.body.start_at;
-    const endService = req.body.end_at;
+    const startService = moment(req.body.start_at).format("YYYY-MM-DD");
+    const endService = moment(req.body.end_at).format("YYYY-MM-DD");
     try {
       let { rows } = await database.raw(
-        `select exists(select 1 from loan where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
+        `select exists(select 1 from loan where start_at='${startService}' and id_vehicle=${idVehicle}) as exists limit 1`
       );
       let exists = await database.raw(
-        `select exists(select 1 from services where start_at='${req.body.start_at}' and id_vehicle=${req.body.vehicle}) as exists limit 1`
+        `select exists(select 1 from services where start_at='${startService}' and id_vehicle=${idVehicle}) as exists limit 1`
       );
       if (!rows[0].exists && !exists.rows[0].exists) {
         let service = await database("services").insert(
@@ -314,21 +314,6 @@ router.delete(
     }
   }
 );
-
-router.get("/testing-between", async (req, res) => {
-  const endOfMonth = moment().endOf("month").format("YYYY-MM-DD");
-  try {
-    let data = await database("loan")
-      .where("id_vehicle", 11)
-      .whereBetween("start_at", ["2021-08-18", endOfMonth])
-      .update({
-        ready: true,
-      });
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json(error);
-  }
-});
 
 router.put(
   "/service",
