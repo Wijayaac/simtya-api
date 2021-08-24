@@ -504,6 +504,24 @@ router.get("/vehicle/:type", async (req, res) => {
     });
   }
 });
+router.get("/vehicle-ready/:type", async (req, res) => {
+  try {
+    const data = await database
+      .select("id", "name", "type")
+      .from("vehicles")
+      .where("type", req.params.type)
+      .where("ready", true);
+    res
+      .status(200)
+      .json({ success: true, message: "Success processing data", data });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Oops you hit an error, try again later ya....",
+      error,
+    });
+  }
+});
 router.post(
   "/inventory",
   passport.authenticate("admin", { session: false }),
@@ -653,6 +671,9 @@ router.put("/loan/confirm/:id", async (req, res) => {
         end_at: start,
         type: "Check Service",
         id_user: 1,
+      });
+      await database("vehicles").where("id", req.body.vehicle).update({
+        ready: false,
       });
     }
     res

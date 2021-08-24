@@ -263,31 +263,82 @@ router.post(
   }
 );
 
+router.get("/testing-km", async (req, res) => {
+  try {
+    let data = await database
+      .select("vehicles.km", "loan.end_km")
+      .from("loan")
+      .leftJoin("vehicles", "vehicles.id", "loan.id_vehicle")
+      .where("loan.id", "=", 17);
+
+    const start = data[0].km;
+    const end = data[0].end_km;
+    let serviceRoutine = (end - start) % 2000 <= 50;
+    if (serviceRoutine) res.status(200).json({ serviceRoutine });
+
+    res.status(203).json({ message: "Thank for loan" });
+  } catch (error) {
+    res.status(404).json(error);
+  }
+});
 router.put(
   "/loan",
   passport.authenticate("member", { session: false }),
   async (req, res) => {
+    const start = moment().format("YYYY-MM-DD");
+    const idService = req.body.id;
+    let serviceRoutine = false;
     try {
-      data = await database("loan").where("id", req.body.id).update({
-        id_vehicle: req.body.id_vehicle,
+      let data = await database("loan").where("id", idService).update({
         purpose: req.body.purpose,
         accidents: req.body.accidents,
-        start_at: req.body.start_at,
-        end_at: req.body.end_at,
         start_km: req.body.start_km,
         end_km: req.body.end_km,
         description: req.body.description,
       });
-      if (req.body.accidents)
+      let countKm = await database
+        .select("vehicles.km", "loan.end_km")
+        .from("loan")
+        .leftJoin("vehicles", "vehicles.id", "loan.id_vehicle")
+        .where("loan.id", "=", idService);
+
+      if (countKm) {
+        const startKm = countKm[0].km;
+        const endKm = countKm[0].end_km;
+        serviceRoutine = (endKm - startKm) % 2000 <= 70;
+      } else {
+        serviceRoutine = false;
+      }
+
+      if (req.body.accidents) {
+        await database("services").insert({
+          id_vehicle: req.body.vehicle,
+          start_at: start,
+          end_at: start,
+          type: `Incident Service ${serviceRoutine ? "+ Service Routine" : ""}`,
+          id_user: 2,
+        });
+        await database("vehicles").where("id", req.body.vehicle).update({
+          ready: false,
+        });
         bot.sendMessage(
           adminId,
           `Loan motorcycle with purpose :${req.body.purpose} having an accident with detail : ${req.body.description}`
         );
+      }
       if (req.body.finish)
         bot.sendMessage(
           adminId,
           `Loan motorcycle with purpose :${req.body.purpose} finish loan please confirm`
         );
+      if (serviceRoutine)
+        await database("services").insert({
+          id_vehicle: req.body.vehicle,
+          start_at: start,
+          end_at: start,
+          type: "Service Routine",
+          id_user: 2,
+        });
       res.status(200).json({
         success: true,
         message: "Success processing that data",
