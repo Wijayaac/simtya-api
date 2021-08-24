@@ -263,24 +263,6 @@ router.post(
   }
 );
 
-router.get("/testing-km", async (req, res) => {
-  try {
-    let data = await database
-      .select("vehicles.km", "loan.end_km")
-      .from("loan")
-      .leftJoin("vehicles", "vehicles.id", "loan.id_vehicle")
-      .where("loan.id", "=", 17);
-
-    const start = data[0].km;
-    const end = data[0].end_km;
-    let serviceRoutine = (end - start) % 2000 <= 50;
-    if (serviceRoutine) res.status(200).json({ serviceRoutine });
-
-    res.status(203).json({ message: "Thank for loan" });
-  } catch (error) {
-    res.status(404).json(error);
-  }
-});
 router.put(
   "/loan",
   passport.authenticate("member", { session: false }),
