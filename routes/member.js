@@ -288,13 +288,15 @@ router.put(
     const start = moment().format("YYYY-MM-DD");
     const idService = req.body.id;
     let serviceRoutine = false;
+    const description = req.body.description;
+    const accident = req.body.accidents;
     try {
       let data = await database("loan").where("id", idService).update({
         purpose: req.body.purpose,
-        accidents: req.body.accidents,
+        accidents: accident,
         start_km: req.body.start_km,
         end_km: req.body.end_km,
-        description: req.body.description,
+        description: description,
       });
       let countKm = await database
         .select("vehicles.km", "loan.end_km")
@@ -310,20 +312,13 @@ router.put(
         serviceRoutine = false;
       }
 
-      if (req.body.accidents) {
-        await database("services").insert({
-          id_vehicle: req.body.vehicle,
-          start_at: start,
-          end_at: start,
-          type: `Incident Service ${serviceRoutine ? "+ Service Routine" : ""}`,
-          id_user: 2,
-        });
+      if (accident) {
         await database("vehicles").where("id", req.body.vehicle).update({
           ready: false,
         });
         bot.sendMessage(
           adminId,
-          `Loan motorcycle with purpose :${req.body.purpose} having an accident with detail : ${req.body.description}`
+          `Loan motorcycle with purpose :${req.body.purpose} having an accident with detail : ${description}`
         );
       }
       if (req.body.finish)
@@ -331,13 +326,16 @@ router.put(
           adminId,
           `Loan motorcycle with purpose :${req.body.purpose} finish loan please confirm`
         );
-      if (serviceRoutine)
+      if (serviceRoutine || accident)
         await database("services").insert({
           id_vehicle: req.body.vehicle,
           start_at: start,
           end_at: start,
-          type: "Service Routine",
+          type: `${serviceRoutine ? "Service Routine," : ""}  ${
+            accident ? "Incident Service" : ""
+          }`,
           id_user: 2,
+          description: description,
         });
       res.status(200).json({
         success: true,
