@@ -412,13 +412,14 @@ router.get(
           "services.type",
           "services.start_at",
           "services.end_at",
-          "vehicles.name"
+          "vehicles.name",
+          "vehicles.plate"
         )
         .from("services")
         .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
         .limit(perPage)
         .offset((currentPage - 1) * perPage)
-        .orderBy("id", "desc");
+        .orderBy("vehicles.id", "desc");
       let { count } = await database("services").count("id").first();
       res.status(200).json({
         success: true,
@@ -465,6 +466,7 @@ router.get(
           "name",
           "photo",
           "years",
+          "plate",
           "brand",
           "type",
           "now_km",
@@ -490,7 +492,7 @@ router.get(
 router.get("/vehicle/:type", async (req, res) => {
   try {
     const data = await database
-      .select("id", "name", "type")
+      .select("id", "name", "type", "plate")
       .from("vehicles")
       .where("type", req.params.type);
     res
@@ -507,7 +509,7 @@ router.get("/vehicle/:type", async (req, res) => {
 router.get("/vehicle-ready/:type", async (req, res) => {
   try {
     const data = await database
-      .select("id", "name", "type")
+      .select("id", "name", "type", "plate")
       .from("vehicles")
       .where("type", req.params.type)
       .where("ready", true);
@@ -533,6 +535,7 @@ router.post(
         {
           name: req.body.name,
           type: req.body.type,
+          plate: req.body.plate,
           brand: req.body.brand,
           km: req.body.km,
           now_km: req.body.now,
@@ -570,6 +573,7 @@ router.put(
       data = await database("vehicles").where("id", req.body.id).update({
         name: req.body.name,
         type: req.body.type,
+        plate: req.body.plate,
         brand: req.body.brand,
         km: req.body.km,
         now_km: req.body.now,
@@ -626,6 +630,7 @@ router.get(
           "loan.start_at",
           "loan.end_at",
           "vehicles.name",
+          "vehicles.plate",
           "loan.id_vehicle"
         )
         .from("loan")
@@ -633,7 +638,7 @@ router.get(
         .leftJoin("users", "loan.id_user", "users.id")
         .limit(perPage)
         .offset((currentPage - 1) * perPage)
-        .orderBy("id", "desc");
+        .orderBy("vehicles.id", "desc");
       let { count } = await database("loan").count("id").first();
       res.status(200).json({
         success: true,

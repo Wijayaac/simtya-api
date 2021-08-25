@@ -175,13 +175,14 @@ router.get(
           "services.type",
           "services.start_at",
           "services.end_at",
-          "vehicles.name"
+          "vehicles.name",
+          "vehicles.plate"
         )
         .from("services")
         .leftJoin("vehicles", "services.id_vehicle", "vehicles.id")
         .limit(perPage)
         .offset((currentPage - 1) * perPage)
-        .orderBy("id", "desc");
+        .orderBy("vehicles.id", "desc");
       let { count } = await database("services").count("id").first();
       res.status(200).json({
         success: true,

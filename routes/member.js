@@ -57,12 +57,12 @@ router.get("/chart/pickup/:user", async (req, res) => {
 router.get("/event", async (req, res) => {
   try {
     loan = await database
-      .select("loan.start_at", "vehicles.name")
+      .select("loan.start_at", "vehicles.name", "vehicles.plate")
       .from("loan")
       .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
       .orderBy("loan.start_at", "asc");
     service = await database
-      .select("services.start_at", "vehicles.name")
+      .select("services.start_at", "vehicles.name", "vehicles.plate")
       .from("services")
       .innerJoin("vehicles", "services.id_vehicle", "vehicles.id")
       .orderBy("services.start_at", "asc");
@@ -81,7 +81,7 @@ router.get("/event", async (req, res) => {
   }
 });
 router.get(
-  "/loanlist/:id/:page",
+  "/loan-list/:id/:page",
   passport.authenticate("member", { session: false }),
   async (req, res) => {
     const currentPage = req.params.page || 1;
@@ -93,7 +93,8 @@ router.get(
           "loan.purpose",
           "loan.start_at",
           "loan.end_at",
-          "vehicles.name"
+          "vehicles.name",
+          "vehicles.plate"
         )
         .from("loan")
         .innerJoin("vehicles", "loan.id_vehicle", "vehicles.id")
