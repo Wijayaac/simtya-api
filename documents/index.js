@@ -243,7 +243,7 @@ const buildServiceHTML = (data) => {
             </table>
             <br />
             <div class="justify-content-between">
-                <h3 class="justify-center">Total Vehicles:${data.length}</h3>
+                <h3 class="justify-center">Total Service:${data.length}</h3>
             </div>
          </div>
       </body>

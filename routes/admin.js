@@ -877,7 +877,7 @@ router.get(
 );
 
 router.get(
-  "/servicedetail/:id",
+  "/service-detail/:id",
   passport.authenticate("admin", { session: false }),
   async (req, res) => {
     try {

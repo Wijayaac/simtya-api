@@ -128,18 +128,20 @@ router.get(
     try {
       data = await database
         .select(
-          "id",
-          "purpose",
-          "accidents",
-          "start_at",
-          "end_at",
-          "description",
-          "id_vehicle",
-          "start_km",
-          "end_km"
+          "loan.id",
+          "loan.purpose",
+          "loan.accidents",
+          "loan.start_at",
+          "loan.end_at",
+          "loan.description",
+          "loan.id_vehicle",
+          "loan.start_km",
+          "loan.end_km",
+          "vehicles.now_km"
         )
         .from("loan")
-        .where("id", req.params.id);
+        .leftJoin("vehicles", "loan.id_vehicle", "vehicles.id")
+        .where("loan.id", req.params.id);
       res.status(200).json({
         success: true,
         message: "success processing that data",

@@ -255,7 +255,7 @@ router.post(
 );
 
 router.get(
-  "/servicedetail/:id",
+  "/service-detail/:id",
   passport.authenticate("driver", { session: false }),
   async (req, res) => {
     try {
@@ -270,7 +270,8 @@ router.get(
           "services.end_km",
           "services.start_at",
           "services.end_at",
-          "services.id_vehicle"
+          "services.id_vehicle",
+          "vehicles.now_km"
         )
         .from("services")
         .leftJoin(
@@ -278,6 +279,7 @@ router.get(
           "services.id",
           "service_details.id_service"
         )
+        .leftJoin("vehicles", "services.id_vehicle", "vehicles.id")
         .where("services.id", req.params.id);
       res.status(200).json({
         success: true,
