@@ -17,6 +17,7 @@ exports.up = function (knex, Promise) {
       table.increments();
       table.string("name", 50);
       table.string("type", 20);
+      table.string("plate", 10);
       table.string("brand", 20);
       table.integer("years", 5);
       table.integer("km", 8);
