@@ -1,0 +1,219 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
+-- Dumped by pg_dump version 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
+
+-- Started on 2021-09-06 15:40:18 WITA
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 3071 (class 0 OID 16472)
+-- Dependencies: 203
+-- Data for Name: knex_migrations; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.knex_migrations VALUES (7, '20210607014234_create-users-table.js', 1, '2021-07-05 08:33:03.989+08');
+
+
+--
+-- TOC entry 3073 (class 0 OID 16480)
+-- Dependencies: 205
+-- Data for Name: knex_migrations_lock; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.knex_migrations_lock VALUES (1, 0);
+
+
+--
+-- TOC entry 3083 (class 0 OID 16966)
+-- Dependencies: 215
+-- Data for Name: loan; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.loan VALUES (18, 11, 89458, 91460, '2021-08-24', '2021-08-24', true, 'Ban Pecah', NULL, '2021-08-24 11:19:15.493838+08', '2021-08-24 11:19:15.493838+08', 'Pembelian bahan bahan jajanan', 8, true);
+INSERT INTO public.loan VALUES (19, 11, 91460, 93460, '2021-08-25', '2021-08-25', true, 'perlu ganti ban', true, '2021-08-25 08:47:09.094824+08', '2021-08-25 08:47:09.094824+08', 'Jogging di ITDC', 8, true);
+
+
+--
+-- TOC entry 3085 (class 0 OID 16979)
+-- Dependencies: 217
+-- Data for Name: loan_details; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+
+
+--
+-- TOC entry 3087 (class 0 OID 16992)
+-- Dependencies: 219
+-- Data for Name: pickup; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.pickup VALUES (18, 10, 'Pickup at The Ritz-Carlton', 894465, 894480, '2021-08-16 16:00:00', '2021-08-16 16:44:00', NULL, NULL, true, false, '2021-08-16 14:44:33.770059+08', '2021-08-16 14:44:33.770059+08', 12);
+INSERT INTO public.pickup VALUES (19, 12, 'Pickup at The Ritz-Carlton', NULL, NULL, '2021-08-28 16:00:00', '2021-08-28 18:30:00', NULL, NULL, true, false, '2021-08-28 14:27:53.202969+08', '2021-08-28 14:27:53.202969+08', 11);
+
+
+--
+-- TOC entry 3089 (class 0 OID 17005)
+-- Dependencies: 221
+-- Data for Name: pickup_details; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.pickup_details VALUES (20, 19, 8, 'Join Pickup schedule', '2021-08-28 14:28:18.305804+08', '2021-08-28 14:28:18.305804+08', true);
+
+
+--
+-- TOC entry 3081 (class 0 OID 16953)
+-- Dependencies: 213
+-- Data for Name: service_details; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.service_details VALUES (3, 29, NULL, NULL, NULL, '2021-08-24 11:21:01.951424+08', '2021-08-24 11:21:01.951424+08');
+INSERT INTO public.service_details VALUES (4, 30, 15000, 'ban', 'Ban Pecah', '2021-08-24 11:22:11.157916+08', '2021-08-24 11:22:11.157916+08');
+INSERT INTO public.service_details VALUES (5, 31, NULL, NULL, NULL, '2021-08-25 08:48:40.058477+08', '2021-08-25 08:48:40.058477+08');
+INSERT INTO public.service_details VALUES (6, 32, 200000, 'beli ban', 'ganti ban baru', '2021-08-25 08:49:17.100099+08', '2021-08-25 08:49:17.100099+08');
+INSERT INTO public.service_details VALUES (7, 33, NULL, NULL, NULL, '2021-08-25 15:20:18.158982+08', '2021-08-25 15:20:18.158982+08');
+INSERT INTO public.service_details VALUES (8, 34, NULL, NULL, NULL, '2021-08-25 15:20:40.558694+08', '2021-08-25 15:20:40.558694+08');
+
+
+--
+-- TOC entry 3079 (class 0 OID 16940)
+-- Dependencies: 211
+-- Data for Name: services; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.services VALUES (31, 11, 2, NULL, NULL, '2021-08-25', '2021-08-25', 'ban pecah', NULL, '2021-08-25 08:48:40.036967+08', '2021-08-25 08:48:40.036967+08', 'Service Routine,  Incident Service');
+INSERT INTO public.services VALUES (32, 11, 1, 653132, 653135, '2021-08-25', '2021-08-25', 'ganti ban baru', true, '2021-08-25 08:49:17.098191+08', '2021-08-25 08:49:17.098191+08', 'Check Service');
+INSERT INTO public.services VALUES (34, 11, 2, NULL, NULL, '2021-08-26', '2021-08-26', NULL, NULL, '2021-08-25 15:20:40.555966+08', '2021-08-25 15:20:40.555966+08', 'Incident Service');
+
+
+--
+-- TOC entry 3075 (class 0 OID 16914)
+-- Dependencies: 207
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.users VALUES (6, NULL, 'admin@simtya.com', 'saya_admin', 1, NULL, NULL, NULL, '45d27efc547cbe06e6c1919260148cf87ebeb50a2fff4e5ac55ae236c8f1bbad', '6fdb990d05a9820526f3dbbadbfef976322a69349b2ea75b995c6a474a5dc79e9e25555792ce9ab7192ff6e749ac282c4e6743df7390c9dff309280545859a15', '2021-08-16 13:32:37.063697+08', '2021-08-16 13:32:37.063697+08');
+INSERT INTO public.users VALUES (7, NULL, 'driver@simtya.com', 'saya_sopir', 2, NULL, NULL, NULL, '2d3de6f05af8f7f050ae6f8467003dc1aa14387bf5c0e0dedcecb5b9ae09d6c5', 'a1bcbfb05f5cfc8fa76560d1217be063daa72d090a4bd389870e47eda0bc1e1763f75d5145ec0e581531d916c959dc57af6d0190323d7614380b2743079fc6a0', '2021-08-16 13:33:46.088079+08', '2021-08-16 13:33:46.088079+08');
+INSERT INTO public.users VALUES (8, 'Wijaya', 'wijayaac25@gmail.com', 'wijayaac25', 3, NULL, NULL, NULL, 'da06756409605c58251e15d42a984b7660dbc8e25dff0afd989c1c9a52d910d3', '93d3f094994640e8d979dbc31050a2709c1715caadab3032686a23555d841f5e4055ed3cb26fbdd321502570ffa3d099ad8a3f8007f577a18b151b002455e470', '2021-08-16 14:51:27.197459+08', '2021-08-16 14:51:27.197459+08');
+
+
+--
+-- TOC entry 3077 (class 0 OID 16927)
+-- Dependencies: 209
+-- Data for Name: vehicles; Type: TABLE DATA; Schema: public; Owner: wijaya
+--
+
+INSERT INTO public.vehicles VALUES (13, 'Vario 110 old', 'motorcycle', 'Honda', 2015, '1629121196706_motorcycle2.jpg', 'motor ini dipakai oleh anggota untuk keperluan bersama', '2021-08-16 21:39:56.721939+08', '2021-08-16 21:39:56.721939+08', 59465, 65440, false, 'DK3729BA');
+INSERT INTO public.vehicles VALUES (11, 'Vario 110 eSP', 'motorcycle', 'Honda', 2018, '1629096571949_motorcycle3.jpg', 'Motor digunakan untuk kepentingan bersama -sama', '2021-08-16 14:49:31.963425+08', '2021-08-16 14:49:31.963425+08', 89456, 93460, false, 'DK7218AC');
+INSERT INTO public.vehicles VALUES (10, 'Travello Silver', 'car', 'Kia', 2016, '1629096088881_carvehicles1.jpg', 'Mobil ini digunakan untuk penjemputan dan kepentingan umum lainnya', '2021-08-16 14:41:28.899741+08', '2021-08-16 14:41:28.899741+08', 894465, 894480, true, 'DK8263FF');
+INSERT INTO public.vehicles VALUES (12, 'Pregio Silver', 'car', 'Honda', 2015, '1629120700223_carvehicles2.jpg', 'Mobil untuk penjemputan anggota', '2021-08-16 21:31:40.253675+08', '2021-08-16 21:31:40.253675+08', 123121, NULL, true, 'DK2368OP');
+
+
+--
+-- TOC entry 3105 (class 0 OID 0)
+-- Dependencies: 202
+-- Name: knex_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.knex_migrations_id_seq', 7, true);
+
+
+--
+-- TOC entry 3106 (class 0 OID 0)
+-- Dependencies: 204
+-- Name: knex_migrations_lock_index_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.knex_migrations_lock_index_seq', 1, true);
+
+
+--
+-- TOC entry 3107 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: loan_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.loan_details_id_seq', 1, false);
+
+
+--
+-- TOC entry 3108 (class 0 OID 0)
+-- Dependencies: 214
+-- Name: loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.loan_id_seq', 19, true);
+
+
+--
+-- TOC entry 3109 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: pickup_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.pickup_details_id_seq', 20, true);
+
+
+--
+-- TOC entry 3110 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: pickup_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.pickup_id_seq', 19, true);
+
+
+--
+-- TOC entry 3111 (class 0 OID 0)
+-- Dependencies: 212
+-- Name: service_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.service_details_id_seq', 8, true);
+
+
+--
+-- TOC entry 3112 (class 0 OID 0)
+-- Dependencies: 210
+-- Name: services_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.services_id_seq', 34, true);
+
+
+--
+-- TOC entry 3113 (class 0 OID 0)
+-- Dependencies: 206
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 8, true);
+
+
+--
+-- TOC entry 3114 (class 0 OID 0)
+-- Dependencies: 208
+-- Name: vehicles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: wijaya
+--
+
+SELECT pg_catalog.setval('public.vehicles_id_seq', 13, true);
+
+
+-- Completed on 2021-09-06 15:40:19 WITA
+
+--
+-- PostgreSQL database dump complete
+--
+
